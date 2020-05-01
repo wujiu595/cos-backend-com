@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  nats:
+    image: nats-streaming:latest
+    container_name: nats-stream
+    ports:
+      - 4222:4222
+      - 8222:8222
+    command:
+      - "-cid"
+      - "test-cid"
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - 6379:6379
+
+  db:
+    image: postgres:10.3-alpine
+    container_name: db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=comunion2020
+      - POSTGRES_PASSWORD=comunion2020
+      - POSTGRES_DB=comunion
