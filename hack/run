@@ -73,6 +73,10 @@ function database(){
     esac
 }
 
+function gen() {
+    cd ${BDIR}/hack/gnorm && gnorm gen
+}
+
 function show_help(){
     cat <<-EOF
 ${@}

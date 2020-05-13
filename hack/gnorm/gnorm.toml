@@ -1,0 +1,88 @@
+# !!!! YOU NEED TO CHANGE THIS !!!!
+# This is the connection string for your database
+#handle
+ConnStr = "dbname=platform host=127.0.0.1 port=5432 sslmode=disable user=platform password=dataoo0fly"
+
+DBType = "postgres"
+
+Schemas = ["platform"]
+
+PluginDirs = ["plugins"]
+
+# PostRun = ["goimports", "-w", "$GNORMFILE"]
+PostRun = ["gofmt"]
+
+NameConversion = "{{pascal .}}"
+
+IncludeTables = []
+
+ExcludeTables = []
+
+# This will output the files in a subdirectory called "gnorm".  You can change
+# this, but if you do, change the RootPkg definition below to match what the
+# package name should be.
+OutputDir = "export"
+
+[Params]
+# RootPkg is the package declaration for the output dir. It should match the
+# directory name above. You may change this as appropriate.
+RootPkg = "platform"
+
+# !!!! YOU NEED TO CHANGE THIS !!!!
+# RootImport is the import path for the output directory.
+RootImport = "gnorm.org/postgres-go/trace"
+
+[SchemaPaths]
+# "fields.go" = "templates/fields.gotmpl"
+# "db.go" = "templates/db.gotmpl"
+
+[TablePaths]
+# "{{snake .Table}}/{{snake .Table}}.go" = "templates/table.gotmpl"
+"proto/{{snake .Table}}" = "templates/table.gotmpl"
+
+[EnumPaths]
+"enum/{{snake .Enum}}" = "templates/enum.gotmpl"
+
+[TypeMap]
+"bigint" = "flake.ID"
+"timestamp with time zone" = "time.Time"
+"time without time zone" = "time.Time"
+"smallint" = "int32"
+"defect" = "string"
+"date" = "time.Time"
+"timestamptz" = "time.Time"
+"varchar" = "string"
+"text" = "string"
+"boolean" = "bool"
+"granularity" = "string"
+# from "github.com/satori/go.uuid"
+"uuid" = "uuid.UUID"
+"character varying" = "string"
+"character" = "string"
+"integer" = "int"
+"int4" = "int32"
+"numeric" = "float64"
+"double precision" = "float64"
+# from "github.com/lib/pq/hstore"
+"hstore" = "hstore.Hstore"
+# note that the package name here has to be kept in sync with the RootPkg above.
+"jsonb" = "types.JSONText"
+# the package name here needs to be kept in sync with the enum template's package name
+"macaddr" = "string"
+
+
+[NullableTypeMap]
+"timestamp with time zone" = "*time.Time"
+"text" = "*string"
+"boolean" = "*bool"
+"uuid" = "uuid.NullUUID"
+"bigint" = "*flake.ID"
+"double precision" = "*float64"
+"character varying" = "*string"
+"character" = "*string"
+"integer" = "*int64"
+"numeric" = "*float64"
+"hstore" = "hstore.Hstore"
+"cidr" = "*string"
+# note that the package name here has to be kept in sync with the RootPkg above.
+"jsonb" = "*types.JSONText"
