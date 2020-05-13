@@ -1,8 +1,37 @@
 #!/bin/bash
 set -e
 
+BDIR=`cd $( dirname "${BASH_SOURCE[0]}" ) && cd .. && pwd`
+cd ${BDIR}
+
+watch_run() {
+    bin/strip "$@"
+}
+
 pg_docker_run(){
     docker run --rm --network host -e PGPASSWORD=${PGPASSWORD} -v `pwd`:/var/lib/postgresql/data -v /tmp:/tmp -w /var/lib/postgresql/data postgres:10.3-alpine "${@}"
+}
+
+function start(){
+    export RUN_MODE=${RUN_MODE:-dev}
+    name=$1
+    dir=$(echo ${BDIR}/src/*/cmd/${name})
+    mainfile=$(echo $dir/*.go)
+    [[ $dir == *'*'* ]] && show_help "not found service path ${dir}"
+    [[ $mainfile == *'*'* ]] && show_help "not found main package file ${mainfile}"
+    case "${name}" in
+        collector)
+            args=""
+            for i in "${@:2}"; do
+                args=$args" -arg=$i"
+            done
+            watch_run -app=${name} run -main=${mainfile} -out=hack/build/${name} -dir=${dir}/../.. -dir=${dir}/../../../libs $args
+            ;;
+        *)
+            watch_run -app=${name} run -main=${mainfile} -out=hack/build/${name} -dir=${dir}/../.. -dir=${dir}/../../../libs -arg="-conf=hack/conf"
+            ;;
+    esac
+
 }
 
 function database(){
@@ -44,6 +73,10 @@ function database(){
     esac
 }
 
+function gen() {
+    cd ${BDIR}/hack/gnorm && gnorm gen
+}
+
 function show_help(){
     cat <<-EOF
 ${@}
@@ -51,6 +84,7 @@ USAGE: ./hack/run [COMMANDS]
 
 COMMANDS:
     database [PROGRAM]
+    start    [app
 EOF
     exit 1
 }
@@ -58,6 +92,9 @@ EOF
 case "${1}" in
     database)
         database ${1} ${@:2}
+        ;;
+    start)
+        start ${@:2}
         ;;
     -h)
         show_help
