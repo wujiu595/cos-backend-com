@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"syscall"
 
-	"github.com/gchaincl/sqlhooks"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+	"github.com/wujiu2020/sqlhooks"
 	"github.com/wujiu2020/strip"
 	"github.com/wujiu2020/strip/utils/helpers"
 

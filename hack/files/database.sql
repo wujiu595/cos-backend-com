@@ -71,6 +71,160 @@ CREATE FUNCTION comunion.id_generator() RETURNS bigint
 $$;
 
 
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: access_keys; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.access_keys (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    key text NOT NULL,
+    secret text NOT NULL,
+    uid bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    state smallint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: categories; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.categories (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    name text NOT NULL,
+    code text NOT NULL,
+    source text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: COLUMN categories.source; Type: COMMENT; Schema: comunion; Owner: -
+--
+
+COMMENT ON COLUMN comunion.categories.source IS 'start_up';
+
+
+--
+-- Name: global_id_sequence; Type: SEQUENCE; Schema: comunion; Owner: -
+--
+
+CREATE SEQUENCE comunion.global_id_sequence
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: start_ups; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.start_ups (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    name text NOT NULL,
+    uid bigint NOT NULL,
+    mission text,
+    logo text NOT NULL,
+    tx_id text NOT NULL,
+    block_num bigint,
+    description_addr text NOT NULL,
+    category_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    state integer DEFAULT 0 NOT NULL,
+    is_iro boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: COLUMN start_ups.state; Type: COMMENT; Schema: comunion; Owner: -
+--
+
+COMMENT ON COLUMN comunion.start_ups.state IS '0 创建中,1 已创建,2 未确认到tx产生,3 上链失败，4 已设置';
+
+
+--
+-- Name: users; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.users (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    wallet_addr text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    is_hunter boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: access_keys access_keys_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.access_keys
+    ADD CONSTRAINT access_keys_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: categories categories_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.categories
+    ADD CONSTRAINT categories_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: start_ups start_ups_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.start_ups
+    ADD CONSTRAINT start_ups_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: users users_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.users
+    ADD CONSTRAINT users_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: access_keys_key; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX access_keys_key ON comunion.access_keys USING btree (id);
+
+
+--
+-- Name: categories_code; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX categories_code ON comunion.categories USING btree (code);
+
+
+--
+-- Name: categories_name; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX categories_name ON comunion.categories USING btree (name);
+
+
+--
+-- Name: start_ups_tx_id; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX start_ups_tx_id ON comunion.start_ups USING btree (tx_id);
+
+
 --
 -- PostgreSQL database dump complete
 --

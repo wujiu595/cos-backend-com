@@ -1,11 +1,11 @@
 # !!!! YOU NEED TO CHANGE THIS !!!!
 # This is the connection string for your database
 #handle
-ConnStr = "dbname=platform host=127.0.0.1 port=5432 sslmode=disable user=platform password=dataoo0fly"
+ConnStr = "dbname=comunion host=127.0.0.1 port=5432 sslmode=disable user=comunion2020 password=comunion2020"
 
 DBType = "postgres"
 
-Schemas = ["platform"]
+Schemas = ["comunion"]
 
 PluginDirs = ["plugins"]
 
@@ -26,7 +26,7 @@ OutputDir = "export"
 [Params]
 # RootPkg is the package declaration for the output dir. It should match the
 # directory name above. You may change this as appropriate.
-RootPkg = "platform"
+RootPkg = "comunion"
 
 # !!!! YOU NEED TO CHANGE THIS !!!!
 # RootImport is the import path for the output directory.

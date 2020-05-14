@@ -17,16 +17,17 @@ CREATE TABLE start_ups
         CONSTRAINT start_ups_id_pk
             PRIMARY KEY,
     name             TEXT                                                     NOT NULL,
+    uid BIGINT not null,
     mission          TEXT,
     logo             TEXT                                                     NOT NULL,
     tx_id            TEXT                                                     NOT NULL,
-    blockNum         BIGINT,
+    block_num        BIGINT,
     description_addr TEXT                                                     NOT NULL,
     category_id      BIGINT                                                   NOT NULL,
     created_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP       NOT NULL,
     updated_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP       NOT NULL,
     state            INT                      DEFAULT 0                       NOT NULL,
-    isIRO            BOOL                     DEFAULT FALSE                   NOT NULL
+    is_iro           BOOL                     DEFAULT FALSE                   NOT NULL
 );
 
 CREATE UNIQUE INDEX start_ups_tx_id ON start_ups (tx_id);
@@ -49,6 +50,16 @@ CREATE UNIQUE INDEX categories_name ON categories (name);
 CREATE UNIQUE INDEX categories_code ON categories (code);
 
 COMMENT ON COLUMN categories.source IS 'start_up';
+
+INSERT INTO categories (
+                        name, code, source
+) VALUES (
+'Non-profit','Non-profit','start_up'
+         ),(
+'Business','Business','start_up'
+         ),(
+'Education','Education','start_up'
+         );
 
 CREATE TABLE access_keys
 (

@@ -44,6 +44,8 @@ github.com/uber/jaeger-client-go v2.23.1+incompatible h1:uArBYHQR0HqLFFAypI7RsWT
 github.com/uber/jaeger-client-go v2.23.1+incompatible/go.mod h1:WVhlPFC8FDjOFMMWRy2pZqQJSXxYSwNYOkTr/Z6d3Kk=
 github.com/uber/jaeger-lib v2.2.0+incompatible h1:MxZXOiR2JuoANZ3J6DE/U0kSFv/eJ/GfSYVCjK7dyaw=
 github.com/uber/jaeger-lib v2.2.0+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
+github.com/wujiu2020/sqlhooks v0.0.0-20200514182239-c1d2a8cea375 h1:XGUg6OPOWHEZywML9ZZZruU3cgm7AdJo2i/Qcs2cRGs=
+github.com/wujiu2020/sqlhooks v0.0.0-20200514182239-c1d2a8cea375/go.mod h1:FYwVXXh3TzKoPBCqhRsaFZGLgdfw+Jj+SnpReSDKxto=
 github.com/wujiu2020/strip v0.0.0-20200513163628-2ac1d0ea2717 h1:VNP3z08KRuxY4BBi0k93iYPtNoBrMaV7d3qwtqc89xc=
 github.com/wujiu2020/strip v0.0.0-20200513163628-2ac1d0ea2717/go.mod h1:vnBNxlQlahm4dBUCX6XU6V0VLOq+p6tehev2/G7Y+QE=
 github.com/wujiu2020/strip v0.0.0-20200513164619-4720c736da6b h1:Hxg2QkjiXSUlDI+4EpX7LC50bQFOSnYPRLPlqPHTgdg=

@@ -1,24 +1,24 @@
 package app
 
 import (
-	"cos-backend-com/src/cores"
-	"net/http"
-	"os"
-
 	"cos-backend-com/src/common/app"
 	"cos-backend-com/src/common/providers/session"
 	"cos-backend-com/src/common/util"
+	"cos-backend-com/src/cores"
+	"cos-backend-com/src/cores/routers/startups"
+	"net/http"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mediocregopher/radix.v2/pool"
-	"github.com/wujiu2020/strip"
+	s "github.com/wujiu2020/strip"
 )
 
 const (
 	AppName = "cores"
 )
 
-func AppInit(tea *strip.Strip, confPath string, files ...string) *appConfig {
+func AppInit(tea *s.Strip, confPath string, files ...string) *appConfig {
 	app := &appConfig{app.New(tea, AppName), cores.Env}
 	app.ConfigLoad(app.Env, confPath, files...)
 	app.ConfigCheck()
@@ -91,6 +91,20 @@ func (p *appConfig) ConfigFilters() {
 
 func (p *appConfig) ConfigRoutes() {
 	p.Routers(util.VersionRouter())
+	p.Routers(
+		s.Router("/startups",
+			//s.Filter(filters.RouterFilter(devices.Filter)),
+			//设备列表
+			s.Post(startups.StartUpsHandler{}).Action("Create"),
+			s.Get(startups.StartUpsHandler{}).Action("List"),
+			s.Router("/:id",
+				s.Get(startups.StartUpsHandler{}).Action("Get"),
+			),
+			s.Router("/me",
+				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
+			),
+		),
+	)
 }
 
 func (p *appConfig) ConfigDone() {
