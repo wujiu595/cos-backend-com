@@ -5,16 +5,26 @@ import (
 	"cos-backend-com/src/common/pagination"
 )
 
+type StartUpState int
+
+const (
+	StartUpStateCreating      StartUpState = 0
+	StartUpStateCreated       StartUpState = 1
+	StartUpStateConfirmFailed StartUpState = 2
+	StartUpStateFailed        StartUpState = 3
+	StartUpStateHasSetting    StartUpState = 4
+)
+
 type CreateStartUpsInput struct {
-	Name            string    `json:"name"`
-	Mission         *string   `json:"mission"`
-	Logo            string    `json:"logo"`
-	TxId            string    `json:"txId"`
-	BlockNum        *flake.ID `json:"blockNum"`
-	DescriptionAddr string    `json:"descriptionAddr"`
-	CategoryId      flake.ID  `json:"categoryId"`
-	State           int       `json:"state"`
-	IsIRO           bool      `json:"isIRO"`
+	Name            string       `json:"name"`
+	Mission         *string      `json:"mission"`
+	Logo            string       `json:"logo"`
+	TxId            string       `json:"txId"`
+	BlockNum        *flake.ID    `json:"blockNum"`
+	DescriptionAddr string       `json:"descriptionAddr"`
+	CategoryId      flake.ID     `json:"categoryId"`
+	State           StartUpState `json:"state"`
+	IsIRO           bool         `json:"isIRO"`
 }
 
 type StartUpsResult struct {
@@ -26,7 +36,7 @@ type StartUpsResult struct {
 	BlockNum        *int64           `json:"blockNum" db:"block_num"`
 	DescriptionAddr string           `json:"descriptionAddr" db:"description_addr"`
 	Category        CategoriesResult `json:"category" db:"category"`
-	State           int              `json:"state" db:"state"`
+	State           StartUpState     `json:"state" db:"state"`
 	IsIRO           bool             `json:"isIRO" db:"is_iro"`
 }
 

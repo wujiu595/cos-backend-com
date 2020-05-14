@@ -5,6 +5,7 @@ import (
 	"cos-backend-com/src/common/providers/session"
 	"cos-backend-com/src/common/util"
 	"cos-backend-com/src/cores"
+	"cos-backend-com/src/cores/routers/categories"
 	"cos-backend-com/src/cores/routers/startups"
 	"net/http"
 	"os"
@@ -93,8 +94,6 @@ func (p *appConfig) ConfigRoutes() {
 	p.Routers(util.VersionRouter())
 	p.Routers(
 		s.Router("/startups",
-			//s.Filter(filters.RouterFilter(devices.Filter)),
-			//设备列表
 			s.Post(startups.StartUpsHandler{}).Action("Create"),
 			s.Get(startups.StartUpsHandler{}).Action("List"),
 			s.Router("/:id",
@@ -102,6 +101,13 @@ func (p *appConfig) ConfigRoutes() {
 			),
 			s.Router("/me",
 				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
+			),
+		),
+
+		s.Router("/categories",
+			s.Get(categories.CategoriesHandler{}).Action("List"),
+			s.Router("/:id",
+				s.Get(categories.CategoriesHandler{}).Action("Get"),
 			),
 		),
 	)

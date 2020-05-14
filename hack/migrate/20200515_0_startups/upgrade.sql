@@ -49,16 +49,16 @@ CREATE TABLE categories
 CREATE UNIQUE INDEX categories_name ON categories (name);
 CREATE UNIQUE INDEX categories_code ON categories (code);
 
-COMMENT ON COLUMN categories.source IS 'start_up';
+COMMENT ON COLUMN categories.source IS 'startup';
 
 INSERT INTO categories (
                         name, code, source
 ) VALUES (
-'Non-profit','Non-profit','start_up'
+'Non-profit','Non-profit','startup'
          ),(
-'Business','Business','start_up'
+'Business','Business','startup'
          ),(
-'Education','Education','start_up'
+'Education','Education','startup'
          );
 
 CREATE TABLE access_keys

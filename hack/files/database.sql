@@ -109,7 +109,7 @@ CREATE TABLE comunion.categories (
 -- Name: COLUMN categories.source; Type: COMMENT; Schema: comunion; Owner: -
 --
 
-COMMENT ON COLUMN comunion.categories.source IS 'start_up';
+COMMENT ON COLUMN comunion.categories.source IS 'startup';
 
 
 --
