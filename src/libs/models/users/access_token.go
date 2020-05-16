@@ -18,11 +18,6 @@ const (
 	PasswordSaltLength       = 8
 )
 
-const (
-	TokenTypeRefreshToken = "refreshtoken"
-	TokenTypeAccessToken  = "accesstoken"
-)
-
 var AccessTokens = &accessTokens{
 	models.DefaultConnector,
 }

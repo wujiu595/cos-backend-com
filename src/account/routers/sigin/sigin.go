@@ -49,11 +49,6 @@ func (p *SignHelper) SigninSession(token *auth.OAuth2Token, expiredAt time.Time)
 	return
 }
 
-func (p *SignHelper) SigninMinappSession(sess sessions.SessionStore, openId, sessionKey string) {
-	sess.Set(auth.LoginWechatMinappOpenId, openId)
-	sess.Set(auth.LoginWechatMinappSess, sessionKey)
-}
-
 func (p *SignHelper) Signout() {
 	p.Sess.Destroy()
 	p.removeOtherSetCookies()

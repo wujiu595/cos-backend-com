@@ -9,8 +9,6 @@ import (
 	"cos-backend-com/src/libs/sdk/account"
 	"database/sql"
 
-	"github.com/jmoiron/sqlx"
-
 	"github.com/wujiu2020/strip/utils"
 )
 
@@ -73,50 +71,32 @@ func (p *users) GetByWalletAddr(ctx context.Context, walletAddr string, output i
 }
 
 func (p *users) Create(ctx context.Context, walletAddr string, output interface{}) (err error) {
+
+	uid, err := p.nextId(ctx)
+	if err != nil {
+		return err
+	}
 	stmt := `
-		INSERT INTO users(wallet_addr)
-		VALUES (${walletAddr})
+		INSERT INTO users(wallet_addr,private_secret,public_secret)
+		VALUES (${walletAddr}, ${private_secret}, ${public_secret})
 		RETURNING id;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{walletAddr}": walletAddr,
-	})
-
-	return p.Invoke(ctx, func(db *sqlx.Tx) error {
-		newCtx := dbconn.WithDB(ctx, db)
-		var uid flake.ID
-		if err := db.GetContext(newCtx, &uid, query, args...); err != nil {
-			return err
-		}
-		if err := p.UpdateSecret(newCtx, uid, output); err != nil {
-			return err
-		}
-		return err
-	})
-}
-
-func (p *users) UpdateSecret(ctx context.Context, uid flake.ID, output interface{}) (err error) {
-	accessKey := CreateAccessKey(uid)
-	accessSecret := CreateSecretKey()
-	stmt := `
-		UPDATE users
-		SET (
-		     private_secret,
-		     public_secret
-		)= (
-		     ${private_secret},
-		     ${public_secret}
-		) WHERE id =${id} RETURNING *;
-	`
-	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{private_secret}": accessKey,
-		"{public_secret}":  accessSecret,
-		"{id}":             uid,
+		"{walletAddr}":     walletAddr,
+		"{private_secret}": CreateAccessKey(uid),
+		"{public_secret}":  CreateSecretKey(),
 	})
 
 	return p.Invoke(ctx, func(db dbconn.Q) error {
 		return db.GetContext(ctx, output, query, args...)
 	})
+}
+
+func (p *users) nextId(ctx context.Context) (netxtId flake.ID, err error) {
+	err = p.Invoke(ctx, func(db dbconn.Q) error {
+		return db.GetContext(ctx, &netxtId, `SELECT id_generator()`)
+	})
+	return
 }
 
 func CreateAccessKey(uid flake.ID) string {

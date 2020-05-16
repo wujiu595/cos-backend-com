@@ -35,12 +35,3 @@ func AuthTransportProvider(tokenURL string) interface{} {
 		}
 	}
 }
-
-func AdminAuthTransportProvider(tokenServer TokenServer) interface{} {
-	return func(rt http.RoundTripper) AdminRoundTripper {
-		return &AuthTransport{
-			TokenServer: tokenServer,
-			Transport:   rt,
-		}
-	}
-}

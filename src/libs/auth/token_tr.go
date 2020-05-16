@@ -136,7 +136,6 @@ func (p *AuthTransport) Token() (token *BearerToken, err error) {
 	if !token.IsExpired() {
 		return
 	}
-
 	token,
 		err = p.TokenServer.RefreshToken()
 	return

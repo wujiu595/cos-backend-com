@@ -24,7 +24,7 @@ func createOAuthToken(id, ak, sk string) (token *auth.OAuth2Token, err error) {
 	values := url.Values{}
 	values.Set("id", id)
 	values.Set("exp", utils.ToStr(refreshExpiresIn))
-	refreshToken, err := createToken(values.Encode(), TokenTypeRefreshToken, ak, sk)
+	refreshToken, err := createToken(values.Encode(), account.TokenTypeRefreshToken, ak, sk)
 	if err != nil {
 		return
 	}
@@ -46,11 +46,11 @@ func createAccessToken(id, ak, sk string) (accessToken string, err error) {
 	values.Set("id", id)
 	values.Set("exp", utils.ToStr(tokenExpiresIn))
 
-	accessToken, err = createToken(values.Encode(), TokenTypeAccessToken, ak, sk)
+	accessToken, err = createToken(values.Encode(), account.TokenTypeAccessToken, ak, sk)
 	return
 }
 
-func createToken(params, salt, ak, sk string) (string, error) {
+func createToken(params string, salt account.TokenType, ak, sk string) (string, error) {
 	value, ok := sessions.EncodeSecureValue(params, ak+sk, time.Now())
 	if !ok {
 		return "", apierror.ErrApiAuthCreateFailed
@@ -77,7 +77,6 @@ func verifyTokenOutter(token string, salt account.TokenType) (raw string, err er
 		return
 	}
 	token = string(b)
-
 	parts := strings.SplitN(token, ":", 2)
 	if len(parts) != 2 {
 		err = errors.New("token verify: invalid size")

@@ -6,9 +6,6 @@ const (
 	LoginToken   = "login_token"
 	LoginRefresh = "login_refresh"
 	LoginExpired = "login_expired"
-
-	LoginWechatMinappOpenId = "minapp_openid"
-	LoginWechatMinappSess   = "minapp_sess"
 )
 
 type OAuth2Token struct {
