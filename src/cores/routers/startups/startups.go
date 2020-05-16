@@ -15,6 +15,7 @@ import (
 
 type StartUpsHandler struct {
 	routers.Base
+	Uid flake.ID `inject:"uid"`
 }
 
 func (h *StartUpsHandler) List() (res interface{}) {
@@ -28,7 +29,7 @@ func (h *StartUpsHandler) List() (res interface{}) {
 	}
 
 	var output cores.ListStartUpsResult
-	total, err := startups.StartUps.List(h.Ctx, 0, &params, &output.Result)
+	total, err := startups.StartUps.List(h.Ctx, nil, &params, &output.Result)
 	if err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
@@ -50,10 +51,8 @@ func (h *StartUpsHandler) ListMe() (res interface{}) {
 		return
 	}
 
-	uid := flake.ID(0)
-
 	var output cores.ListStartUpsResult
-	total, err := startups.StartUps.List(h.Ctx, uid, &params, &output.Result)
+	total, err := startups.StartUps.List(h.Ctx, &h.Uid, &params, &output.Result)
 	if err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
@@ -79,10 +78,8 @@ func (h *StartUpsHandler) Create() (res interface{}) {
 		return
 	}
 
-	uid := flake.ID(0)
-
 	var output cores.StartUpsResult
-	if err := startups.StartUps.Create(h.Ctx, uid, &input, &output); err != nil {
+	if err := startups.StartUps.Create(h.Ctx, h.Uid, &input, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return

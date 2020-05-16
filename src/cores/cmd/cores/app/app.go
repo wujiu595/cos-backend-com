@@ -7,6 +7,8 @@ import (
 	"cos-backend-com/src/cores"
 	"cos-backend-com/src/cores/routers/categories"
 	"cos-backend-com/src/cores/routers/startups"
+	"cos-backend-com/src/libs/auth"
+	"cos-backend-com/src/libs/filters"
 	"net/http"
 	"os"
 
@@ -69,6 +71,8 @@ func (p *appConfig) ConfigProviders() {
 	if err := p.Injector().Find(&rt, ""); err != nil {
 		panic(err)
 	}
+	oauth2TokenURL := p.Env.Service.Account + "/oauth2/token"
+	p.Provide(auth.AuthTransportProvider(oauth2TokenURL))
 }
 
 func (p *appConfig) ConfigFilters() {
@@ -78,11 +82,15 @@ func (p *appConfig) ConfigRoutes() {
 	p.Routers(util.VersionRouter())
 	p.Routers(
 		s.Router("/startups",
-			s.Post(startups.StartUpsHandler{}).Action("Create"),
 			s.Get(startups.StartUpsHandler{}).Action("List"),
 			s.Router("/:id",
 				s.Get(startups.StartUpsHandler{}).Action("Get"),
 			),
+		),
+
+		s.Router("/startups",
+			s.Filter(filters.LoginRequiredInner),
+			s.Post(startups.StartUpsHandler{}).Action("Create"),
 			s.Router("/me",
 				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
 			),
