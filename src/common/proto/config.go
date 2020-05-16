@@ -8,7 +8,6 @@ type CommonEnvConfig struct {
 }
 
 type ServiceEndpoint struct {
-	Auth         string `conf:"auth"`
 	Account      string `conf:"account"`
 	Cores        string `conf:"cores"`
 	Notification string `conf:"notification"`

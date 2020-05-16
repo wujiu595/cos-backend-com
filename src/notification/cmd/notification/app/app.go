@@ -68,22 +68,6 @@ func (p *appConfig) ConfigProviders() {
 	if err := p.Injector().Find(&rt, ""); err != nil {
 		panic(err)
 	}
-
-	//oauth2TokenURL := p.Env.Service.Auth + "/oauth2/token"
-	//
-	//tokenServer, err := auth.NewOAuth2TokenServer(auth.OAuth2Config{
-	//	TokenURL:     oauth2TokenURL,
-	//	ClientId:     p.Env.AdminAccessKey,
-	//	ClientSecret: p.Env.AdminAccessSecret,
-	//	Token:        &auth.BearerToken{},
-	//	Mutex:        &sync.RWMutex{},
-	//	Transport:    rt,
-	//	Log:          helpers.X,
-	//})
-	//p.ProvideAs(accountsdk.AdminAuthTransportProvider(tokenServer), (*auth.AdminRoundTripper)(nil))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (p *appConfig) ConfigFilters() {

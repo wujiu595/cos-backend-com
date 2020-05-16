@@ -1,24 +1,27 @@
 package app
 
 import (
-	"cos-backend-com/src/cores"
-	"net/http"
-	"os"
-
 	"cos-backend-com/src/common/app"
 	"cos-backend-com/src/common/providers/session"
 	"cos-backend-com/src/common/util"
+	"cos-backend-com/src/cores"
+	"cos-backend-com/src/cores/routers/categories"
+	"cos-backend-com/src/cores/routers/startups"
+	"cos-backend-com/src/libs/auth"
+	"cos-backend-com/src/libs/filters"
+	"net/http"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mediocregopher/radix.v2/pool"
-	"github.com/wujiu2020/strip"
+	s "github.com/wujiu2020/strip"
 )
 
 const (
 	AppName = "cores"
 )
 
-func AppInit(tea *strip.Strip, confPath string, files ...string) *appConfig {
+func AppInit(tea *s.Strip, confPath string, files ...string) *appConfig {
 	app := &appConfig{app.New(tea, AppName), cores.Env}
 	app.ConfigLoad(app.Env, confPath, files...)
 	app.ConfigCheck()
@@ -68,22 +71,8 @@ func (p *appConfig) ConfigProviders() {
 	if err := p.Injector().Find(&rt, ""); err != nil {
 		panic(err)
 	}
-
-	//oauth2TokenURL := p.Env.Service.Auth + "/oauth2/token"
-	//
-	//tokenServer, err := auth.NewOAuth2TokenServer(auth.OAuth2Config{
-	//	TokenURL:     oauth2TokenURL,
-	//	ClientId:     p.Env.AdminAccessKey,
-	//	ClientSecret: p.Env.AdminAccessSecret,
-	//	Token:        &auth.BearerToken{},
-	//	Mutex:        &sync.RWMutex{},
-	//	Transport:    rt,
-	//	Log:          helpers.X,
-	//})
-	//p.ProvideAs(accountsdk.AdminAuthTransportProvider(tokenServer), (*auth.AdminRoundTripper)(nil))
-	if err != nil {
-		panic(err)
-	}
+	oauth2TokenURL := p.Env.Service.Account + "/oauth2/token"
+	p.Provide(auth.AuthTransportProvider(oauth2TokenURL))
 }
 
 func (p *appConfig) ConfigFilters() {
@@ -91,6 +80,29 @@ func (p *appConfig) ConfigFilters() {
 
 func (p *appConfig) ConfigRoutes() {
 	p.Routers(util.VersionRouter())
+	p.Routers(
+		s.Router("/startups",
+			s.Get(startups.StartUpsHandler{}).Action("List"),
+			s.Router("/:id",
+				s.Get(startups.StartUpsHandler{}).Action("Get"),
+			),
+		),
+
+		s.Router("/startups",
+			s.Filter(filters.LoginRequiredInner),
+			s.Post(startups.StartUpsHandler{}).Action("Create"),
+			s.Router("/me",
+				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
+			),
+		),
+
+		s.Router("/categories",
+			s.Get(categories.CategoriesHandler{}).Action("List"),
+			s.Router("/:id",
+				s.Get(categories.CategoriesHandler{}).Action("Get"),
+			),
+		),
+	)
 }
 
 func (p *appConfig) ConfigDone() {

@@ -3,7 +3,7 @@ package session
 import (
 	"net/http"
 
-	"cos-backend-com/src/common/apierror"
+	"cos-backend-com/src/libs/apierror"
 
 	"github.com/wujiu2020/strip"
 	"github.com/wujiu2020/strip/sessions"

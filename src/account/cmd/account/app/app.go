@@ -2,23 +2,28 @@ package app
 
 import (
 	"cos-backend-com/src/account"
+	"cos-backend-com/src/account/routers/oauth"
+	"cos-backend-com/src/account/routers/users"
+	"cos-backend-com/src/common/app"
+	"cos-backend-com/src/common/providers"
+	"cos-backend-com/src/common/providers/session"
+	"cos-backend-com/src/common/util"
+	"cos-backend-com/src/libs/auth"
+	"cos-backend-com/src/libs/filters"
 	"net/http"
 	"os"
 
-	"cos-backend-com/src/common/app"
-	"cos-backend-com/src/common/providers/session"
-	"cos-backend-com/src/common/util"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/mediocregopher/radix.v2/pool"
-	t "github.com/wujiu2020/strip"
+	s "github.com/wujiu2020/strip"
+	"github.com/wujiu2020/strip/caches"
 )
 
 const (
 	AppName = "account"
 )
 
-func AppInit(tea *t.Strip, confPath string, files ...string) *appConfig {
+func AppInit(tea *s.Strip, confPath string, files ...string) *appConfig {
 	app := &appConfig{app.New(tea, AppName), account.Env}
 	app.ConfigLoad(app.Env, confPath, files...)
 	app.ConfigCheck()
@@ -47,6 +52,13 @@ func (p *appConfig) ConfigDB() *sqlx.DB {
 }
 
 func (p *appConfig) ConfigProviders() {
+	var rt http.RoundTripper
+	if err := p.Injector().Find(&rt, ""); err != nil {
+		panic(err)
+	}
+
+	var dbconn *sqlx.DB
+	p.Injector().Find(&dbconn)
 
 	redisPool, err := pool.NewCustom("tcp",
 		p.Env.Redis.Addr,
@@ -64,26 +76,19 @@ func (p *appConfig) ConfigProviders() {
 		os.Exit(1)
 	}
 
-	var rt http.RoundTripper
-	if err := p.Injector().Find(&rt, ""); err != nil {
-		panic(err)
-	}
-
-	//oauth2TokenURL := p.Env.Service.Auth + "/oauth2/token"
-	//
-	//tokenServer, err := auth.NewOAuth2TokenServer(auth.OAuth2Config{
-	//	TokenURL:     oauth2TokenURL,
-	//	ClientId:     p.Env.AdminAccessKey,
-	//	ClientSecret: p.Env.AdminAccessSecret,
-	//	Token:        &auth.BearerToken{},
-	//	Mutex:        &sync.RWMutex{},
-	//	Transport:    rt,
-	//	Log:          helpers.X,
-	//})
-	//p.ProvideAs(accountsdk.AdminAuthTransportProvider(tokenServer), (*auth.AdminRoundTripper)(nil))
+	cache, err := caches.NewRedisProvider(caches.RedisConfig{
+		KeyPrefix: "cache:",
+		Client:    redisPool,
+	})
 	if err != nil {
-		panic(err)
+		p.Logger().Error("config caches:", err)
+		os.Exit(1)
 	}
+	oauth2TokenURL := p.Env.Service.Account + "/oauth2/token"
+
+	p.Provide(auth.AuthTransportProvider(oauth2TokenURL))
+	p.ProvideAs(cache, (*caches.CacheProvider)(nil))
+	p.Provide(providers.SessionLimiter(redisPool))
 }
 
 func (p *appConfig) ConfigFilters() {
@@ -91,6 +96,18 @@ func (p *appConfig) ConfigFilters() {
 
 func (p *appConfig) ConfigRoutes() {
 	p.Routers(util.VersionRouter())
+	p.Routers(
+		s.Router("/login",
+			s.Post(users.Guest{}).Action("Login"),
+		),
+		s.Router("/users/me",
+			s.Filter(filters.LoginRequiredInner),
+			s.Get(users.Users{}).Action("GetMe"),
+		),
+		s.Router("/oauth2/token",
+			s.Post(&oauth.Token{}).Action("GrantToken"),
+		),
+	)
 }
 
 func (p *appConfig) ConfigDone() {
