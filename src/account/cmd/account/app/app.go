@@ -2,6 +2,7 @@ package app
 
 import (
 	"cos-backend-com/src/account"
+	"cos-backend-com/src/account/routers/users"
 	"net/http"
 	"os"
 
@@ -11,14 +12,14 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mediocregopher/radix.v2/pool"
-	t "github.com/wujiu2020/strip"
+	s "github.com/wujiu2020/strip"
 )
 
 const (
 	AppName = "account"
 )
 
-func AppInit(tea *t.Strip, confPath string, files ...string) *appConfig {
+func AppInit(tea *s.Strip, confPath string, files ...string) *appConfig {
 	app := &appConfig{app.New(tea, AppName), account.Env}
 	app.ConfigLoad(app.Env, confPath, files...)
 	app.ConfigCheck()
@@ -91,6 +92,11 @@ func (p *appConfig) ConfigFilters() {
 
 func (p *appConfig) ConfigRoutes() {
 	p.Routers(util.VersionRouter())
+	p.Routers(
+		s.Router("/login",
+			s.Post(users.Guest{}).Action("Login"),
+		),
+	)
 }
 
 func (p *appConfig) ConfigDone() {

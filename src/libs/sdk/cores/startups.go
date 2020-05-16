@@ -41,6 +41,9 @@ type StartUpsResult struct {
 }
 
 type ListStartUpsInput struct {
+	CategoryId flake.ID `param:"categoryId"`
+	IsIRO      bool     `param:"isIRo"`
+	Keyword    string   `param:"keyword"`
 	pagination.ListRequest
 }
 

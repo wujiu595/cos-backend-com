@@ -17,7 +17,7 @@ var StartUps = &startUps{
 	Connector: models.DefaultConnector,
 }
 
-// startUps represents controller for 'start_ups'.
+// startUps represents controller for 'startups'.
 type startUps struct {
 	dbconn.Connector
 }
@@ -29,14 +29,28 @@ func (c *startUps) List(ctx context.Context, uid flake.ID, input *coresSdk.ListS
 	if uid != flake.ID(0) {
 		plan.AddCond(`AND t.uid = ${uid}`)
 	}
+	if input.CategoryId != flake.ID(0) {
+		plan.AddCond(`AND t.category_id = ${categoryId}`)
+	}
+	if input.IsIRO {
+		plan.AddCond(`AND t.is_iro = ${isIRO}`)
+	}
+	var keyword string
+	if input.Keyword != "" {
+		keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
+		plan.AddCond(`AND t.name ILIKE ${keyword}`)
+	}
 
 	plan.OrderBySql = ` ORDER BY t.created_at DESC`
 	plan.LimitSql = ` LIMIT ${limit} OFFSET ${offset}`
 
 	plan.Params = map[string]interface{}{
-		"{uid}":    uid,
-		"{offset}": input.Offset,
-		"{limit}":  input.GetLimit(),
+		"{uid}":        uid,
+		"{categoryId}": input.CategoryId,
+		"{isIRO}":      input.IsIRO,
+		"{keyword}":    keyword,
+		"{offset}":     input.Offset,
+		"{limit}":      input.GetLimit(),
 	}
 
 	total, err = c.Query(ctx, outputs, plan)
@@ -66,7 +80,7 @@ func (c *startUps) Get(ctx context.Context, uid, id flake.ID, output interface{}
 
 func (c *startUps) Create(ctx context.Context, uid flake.ID, input *coresSdk.CreateStartUpsInput, output interface{}) error {
 	stmt := `
-	INSERT INTO start_ups (
+	INSERT INTO startups (
 		uid, name, mission, logo, tx_id, description_addr, category_id
 	) VALUES (
 		${uid}, ${name}, ${mission}, ${logo}, ${txId}, ${descriptionAddr}, ${categoryId}
@@ -96,7 +110,7 @@ func (c *startUps) Create(ctx context.Context, uid flake.ID, input *coresSdk.Cre
 
 //func (c *startUps) Update(ctx context.Context, enterpriseId, id flake.ID, input *coresSdk.StartUpsInput, output interface{}) error {
 //	stmt := `
-//	UPDATE start_ups SET (
+//	UPDATE startups SET (
 //		name, mission, logo, tx_id, blocknum, description_addr, category_id, state, isiro, updated_at
 //	) = (
 //		${name}, ${mission}, ${logo}, ${txId}, ${blocknum}, ${descriptionAddr}, ${categoryId}, ${state}, ${isiro}, CURRENT_TIMESTAMP
@@ -132,7 +146,7 @@ func (c *startUps) Create(ctx context.Context, uid flake.ID, input *coresSdk.Cre
 
 func (c *startUps) Query(ctx context.Context, m interface{}, plan *dbquery.Plan) (total int, err error) {
 	filterSql := `
-	FROM start_ups t
+	FROM startups t
 		INNER JOIN categories c ON c.id = t.category_id
 	WHERE 1=1` + plan.Conditions
 
@@ -168,7 +182,7 @@ func (c *startUps) Query(ctx context.Context, m interface{}, plan *dbquery.Plan)
 }
 
 func (c *startUps) Exists(ctx context.Context, uid, id flake.ID) (exists bool, err error) {
-	stmt := "SELECT EXISTS(SELECT 1 FROM start_ups WHERE uid = ${uid} AND id = ${id})"
+	stmt := "SELECT EXISTS(SELECT 1 FROM startups WHERE uid = ${uid} AND id = ${id})"
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{id}":           id,

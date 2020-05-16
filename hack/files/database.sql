@@ -76,21 +76,6 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: access_keys; Type: TABLE; Schema: comunion; Owner: -
---
-
-CREATE TABLE comunion.access_keys (
-    id bigint DEFAULT comunion.id_generator() NOT NULL,
-    key text NOT NULL,
-    secret text NOT NULL,
-    uid bigint NOT NULL,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    state smallint DEFAULT 0 NOT NULL
-);
-
-
---
 -- Name: categories; Type: TABLE; Schema: comunion; Owner: -
 --
 
@@ -125,10 +110,10 @@ CREATE SEQUENCE comunion.global_id_sequence
 
 
 --
--- Name: start_ups; Type: TABLE; Schema: comunion; Owner: -
+-- Name: startups; Type: TABLE; Schema: comunion; Owner: -
 --
 
-CREATE TABLE comunion.start_ups (
+CREATE TABLE comunion.startups (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
     name text NOT NULL,
     uid bigint NOT NULL,
@@ -146,10 +131,10 @@ CREATE TABLE comunion.start_ups (
 
 
 --
--- Name: COLUMN start_ups.state; Type: COMMENT; Schema: comunion; Owner: -
+-- Name: COLUMN startups.state; Type: COMMENT; Schema: comunion; Owner: -
 --
 
-COMMENT ON COLUMN comunion.start_ups.state IS '0 创建中,1 已创建,2 未确认到tx产生,3 上链失败，4 已设置';
+COMMENT ON COLUMN comunion.startups.state IS '0 创建中,1 已创建,2 未确认到tx产生,3 上链失败，4 已设置';
 
 
 --
@@ -159,18 +144,12 @@ COMMENT ON COLUMN comunion.start_ups.state IS '0 创建中,1 已创建,2 未确�
 CREATE TABLE comunion.users (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
     wallet_addr text NOT NULL,
+    public_secret text,
+    private_secret text,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     is_hunter boolean DEFAULT false NOT NULL
 );
-
-
---
--- Name: access_keys access_keys_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
---
-
-ALTER TABLE ONLY comunion.access_keys
-    ADD CONSTRAINT access_keys_id_pk PRIMARY KEY (id);
 
 
 --
@@ -182,11 +161,11 @@ ALTER TABLE ONLY comunion.categories
 
 
 --
--- Name: start_ups start_ups_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+-- Name: startups startups_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
 --
 
-ALTER TABLE ONLY comunion.start_ups
-    ADD CONSTRAINT start_ups_id_pk PRIMARY KEY (id);
+ALTER TABLE ONLY comunion.startups
+    ADD CONSTRAINT startups_id_pk PRIMARY KEY (id);
 
 
 --
@@ -195,13 +174,6 @@ ALTER TABLE ONLY comunion.start_ups
 
 ALTER TABLE ONLY comunion.users
     ADD CONSTRAINT users_id_pk PRIMARY KEY (id);
-
-
---
--- Name: access_keys_key; Type: INDEX; Schema: comunion; Owner: -
---
-
-CREATE UNIQUE INDEX access_keys_key ON comunion.access_keys USING btree (id);
 
 
 --
@@ -222,7 +194,14 @@ CREATE UNIQUE INDEX categories_name ON comunion.categories USING btree (name);
 -- Name: start_ups_tx_id; Type: INDEX; Schema: comunion; Owner: -
 --
 
-CREATE UNIQUE INDEX start_ups_tx_id ON comunion.start_ups USING btree (tx_id);
+CREATE UNIQUE INDEX start_ups_tx_id ON comunion.startups USING btree (tx_id);
+
+
+--
+-- Name: users_wallet_addr; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX users_wallet_addr ON comunion.users USING btree (wallet_addr);
 
 
 --
