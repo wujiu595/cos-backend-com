@@ -1,10 +1,10 @@
 package sigin
 
-/*
 import (
 	. "context"
 	"cos-backend-com/src/common/auth"
-	"cos-backend-com/src/libs/sdk/account"
+	"cos-backend-com/src/common/flake"
+	"cos-backend-com/src/libs/models/users"
 	"net/http"
 	"strings"
 	"time"
@@ -22,11 +22,8 @@ type SignHelper struct {
 	Config  *sessions.CookieConfig   `inject`
 }
 
-func (p *SignHelper) SigninUser(ctx Context, user *account.LoginUserResult, publicSecret, privateSecret string) (sess sessions.SessionStore, err error) {
-	tokenInfo := &account.TokenInfo{
-		Uid: user.Id,
-	}
-	oauthToken, err := accountmodels.AccessTokens.NewToken(ctx, publicSecret, tokenInfo)
+func (p *SignHelper) SigninUser(ctx Context, uid flake.ID, publicSecret, privateSecret string) (sess sessions.SessionStore, err error) {
+	oauthToken, err := users.AccessTokens.NewToken(ctx, uid, publicSecret, privateSecret)
 	if err != nil {
 		return
 	}
@@ -37,7 +34,7 @@ func (p *SignHelper) SigninUser(ctx Context, user *account.LoginUserResult, publ
 	return
 }
 
-func (p *SignHelper) SigninSession(token *sdkauth.OAuth2Token, expiredAt time.Time) (sess sessions.SessionStore, err error) {
+func (p *SignHelper) SigninSession(token *auth.OAuth2Token, expiredAt time.Time) (sess sessions.SessionStore, err error) {
 	p.removeOtherSetCookies()
 	sess, _, err = p.Manager.Regenerate(p.Config, p.Rw, p.Req)
 	if err != nil {
@@ -61,8 +58,6 @@ func (p *SignHelper) Signout() {
 	p.Sess.Destroy()
 	p.removeOtherSetCookies()
 	p.Manager.Destroy(p.Config, p.Rw, p.Req)
-	// TODO
-	// remove token from AccessTokens
 }
 
 func (p *SignHelper) removeOtherSetCookies() {
@@ -76,4 +71,3 @@ func (p *SignHelper) removeOtherSetCookies() {
 	}
 	h["Set-Cookie"] = values
 }
-*/

@@ -76,6 +76,22 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: access_tokens; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.access_tokens (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    uid bigint NOT NULL,
+    token text NOT NULL,
+    refresh text NOT NULL,
+    key text NOT NULL,
+    secret text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: categories; Type: TABLE; Schema: comunion; Owner: -
 --
 
@@ -174,6 +190,27 @@ ALTER TABLE ONLY comunion.startups
 
 ALTER TABLE ONLY comunion.users
     ADD CONSTRAINT users_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: access_tokens_ak_sk_index; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE INDEX access_tokens_ak_sk_index ON comunion.access_tokens USING btree (key, secret);
+
+
+--
+-- Name: access_tokens_created_at_index; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE INDEX access_tokens_created_at_index ON comunion.access_tokens USING btree (created_at);
+
+
+--
+-- Name: access_tokens_refresh_uindex; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX access_tokens_refresh_uindex ON comunion.access_tokens USING btree (refresh);
 
 
 --
