@@ -13,7 +13,6 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-/hack/build/
 /hack/conf/*.*.ini
 /hack/gnorm/export
 /bin
