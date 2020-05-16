@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"cos-backend-com/src/common/flake"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
@@ -9,8 +10,6 @@ import (
 	"net/url"
 
 	"github.com/wujiu2020/strip/utils"
-
-	"cos-backend-com/src/common/flake"
 )
 
 func CreateSuInfo(suid int64, accessToken string) (suInfo string, err error) {

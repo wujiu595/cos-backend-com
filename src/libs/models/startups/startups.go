@@ -2,11 +2,11 @@ package startups
 
 import (
 	"context"
-	"cos-backend-com/src/common/apierror"
 	"cos-backend-com/src/common/dbconn"
 	"cos-backend-com/src/common/dbquery"
 	"cos-backend-com/src/common/flake"
 	"cos-backend-com/src/common/util"
+	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models"
 	coresSdk "cos-backend-com/src/libs/sdk/cores"
 

@@ -8,7 +8,7 @@ import (
 	"github.com/wujiu2020/strip/sessions"
 	"qiniupkg.com/x/rpc.v7"
 
-	"cos-backend-com/src/common/apierror"
+	"cos-backend-com/src/libs/apierror"
 )
 
 type SessionTokenConfig struct {

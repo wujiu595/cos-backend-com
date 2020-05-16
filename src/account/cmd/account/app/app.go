@@ -2,19 +2,21 @@ package app
 
 import (
 	"cos-backend-com/src/account"
+	"cos-backend-com/src/account/routers/oauth"
 	"cos-backend-com/src/account/routers/users"
 	"cos-backend-com/src/common/app"
 	"cos-backend-com/src/common/providers"
 	"cos-backend-com/src/common/providers/session"
 	"cos-backend-com/src/common/util"
+	"cos-backend-com/src/libs/auth"
+	"cos-backend-com/src/libs/filters"
 	"net/http"
 	"os"
-
-	"github.com/wujiu2020/strip/caches"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mediocregopher/radix.v2/pool"
 	s "github.com/wujiu2020/strip"
+	"github.com/wujiu2020/strip/caches"
 )
 
 const (
@@ -82,6 +84,9 @@ func (p *appConfig) ConfigProviders() {
 		p.Logger().Error("config caches:", err)
 		os.Exit(1)
 	}
+	oauth2TokenURL := p.Env.Service.Account + "/oauth2/token"
+
+	p.Provide(auth.AuthTransportProvider(oauth2TokenURL))
 	p.ProvideAs(cache, (*caches.CacheProvider)(nil))
 	p.Provide(providers.SessionLimiter(redisPool))
 }
@@ -94,6 +99,13 @@ func (p *appConfig) ConfigRoutes() {
 	p.Routers(
 		s.Router("/login",
 			s.Post(users.Guest{}).Action("Login"),
+		),
+		s.Router("/users/me",
+			s.Filter(filters.LoginRequiredInner),
+			s.Get(users.Users{}).Action("GetMe"),
+		),
+		s.Router("/oauth2/token",
+			s.Post(&oauth.Token{}).Action("GrantToken"),
 		),
 	)
 }

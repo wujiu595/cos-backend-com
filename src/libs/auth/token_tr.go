@@ -2,33 +2,20 @@ package auth
 
 import (
 	"bytes"
+	"cos-backend-com/src/common/client"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
-
-	"cos-backend-com/src/common/client"
 )
 
 const (
 	XAuthSuHeader = "X-Auth-Su"
-
-	AuthKindNull    AuthKind = 0
-	AuthKindHeader  AuthKind = 1
-	AuthKindSession AuthKind = 2
 )
-
-type AuthKind int
-
-func (p AuthKind) String() string {
-	return strconv.FormatInt(int64(p), 10)
-}
 
 type RoundTripper interface {
 	http.RoundTripper
 	Token() (*BearerToken, error)
-	Kind() AuthKind
 	D80DB09ECCCF11E6975F6C4008BF70FA()
 }
 
@@ -138,24 +125,21 @@ retry:
 	return
 }
 
+func (p *AuthTransport) CancelRequest(req *http.Request) {
+	if rt, ok := p.Transport.(client.TransportCanceler); ok {
+		rt.CancelRequest(req)
+	}
+}
+
 func (p *AuthTransport) Token() (token *BearerToken, err error) {
 	token = p.TokenServer.GetToken()
 	if !token.IsExpired() {
 		return
 	}
 
-	token, err = p.TokenServer.RefreshToken()
+	token,
+		err = p.TokenServer.RefreshToken()
 	return
-}
-
-func (p *AuthTransport) Kind() AuthKind {
-	return AuthKindSession
-}
-
-func (p *AuthTransport) CancelRequest(req *http.Request) {
-	if rt, ok := p.Transport.(client.TransportCanceler); ok {
-		rt.CancelRequest(req)
-	}
 }
 
 func (p *AuthTransport) Su(suid int64) RoundTripper {

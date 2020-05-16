@@ -2,8 +2,7 @@ package account
 
 import (
 	"cos-backend-com/src/common/flake"
-
-	"github.com/dgrijalva/jwt-go"
+	"time"
 )
 
 const (
@@ -26,19 +25,13 @@ func (p TokenType) String() string {
 	return string(p)
 }
 
-type TokenInfo struct {
-	Uid flake.ID `json:"uid"`
-}
-
-type RefreshTokenClaims struct {
-	TokenClaims
-}
-
-type AccessTokenClaims struct {
-	TokenClaims
-}
-
-type TokenClaims struct {
-	TokenInfo
-	jwt.StandardClaims
+type AccessTokensResult struct {
+	Id        flake.ID  `json:"id" db:"id"`                // id
+	UId       flake.ID  `json:"uid" db:"uid"`              // uid
+	Token     string    `json:"token" db:"token"`          // token
+	Refresh   string    `json:"refresh" db:"refresh"`      // refresh
+	Key       string    `json:"key" db:"key"`              // key
+	Secret    string    `json:"secret" db:"secret"`        // secret
+	CreatedAt time.Time `json:"createdAt" db:"created_at"` // created_at
+	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"` // updated_at
 }

@@ -1,10 +1,8 @@
 package auth
 
 import (
-	"net/http"
-
-	"cos-backend-com/src/common/apierror"
 	"cos-backend-com/src/common/client"
+	"net/http"
 )
 
 type AuthHeaderTransport struct {
@@ -14,9 +12,6 @@ type AuthHeaderTransport struct {
 }
 
 func (p *AuthHeaderTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	if p.AccessToken == "" {
-		return nil, apierror.ErrNeedLogin
-	}
 	req.Header.Set("Authorization", "Bearer "+p.AccessToken)
 	if p.XAuthSuHeader != "" {
 		req.Header.Set(XAuthSuHeader, p.XAuthSuHeader)
@@ -25,14 +20,7 @@ func (p *AuthHeaderTransport) RoundTrip(req *http.Request) (resp *http.Response,
 }
 
 func (p *AuthHeaderTransport) Token() (*BearerToken, error) {
-	if p.AccessToken == "" {
-		return nil, apierror.ErrNeedLogin
-	}
 	return &BearerToken{AccessToken: p.AccessToken}, nil
-}
-
-func (p *AuthHeaderTransport) Kind() AuthKind {
-	return AuthKindHeader
 }
 
 func (p *AuthHeaderTransport) CancelRequest(req *http.Request) {

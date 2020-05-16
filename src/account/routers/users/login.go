@@ -11,7 +11,7 @@ import (
 
 	"github.com/wujiu2020/strip/utils/apires"
 
-	"cos-backend-com/src/common/apierror"
+	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/sdk/account"
 )
 

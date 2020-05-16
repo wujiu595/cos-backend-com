@@ -2,8 +2,8 @@ package sigin
 
 import (
 	. "context"
-	"cos-backend-com/src/common/auth"
 	"cos-backend-com/src/common/flake"
+	"cos-backend-com/src/libs/auth"
 	"cos-backend-com/src/libs/models/users"
 	"net/http"
 	"strings"

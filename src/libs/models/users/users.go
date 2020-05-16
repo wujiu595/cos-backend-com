@@ -42,6 +42,21 @@ func (p *users) FindOrCreate(ctx context.Context, walletAddr string, output *acc
 	return p.Create(ctx, walletAddr, output)
 }
 
+func (p *users) Get(ctx context.Context, id flake.ID, output interface{}) (err error) {
+	stmt := `
+		SELECT *
+		FROM users
+		WHERE id = ${id};
+	`
+	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+		"{id}": id,
+	})
+
+	return p.Invoke(ctx, func(db dbconn.Q) error {
+		return db.GetContext(ctx, output, query, args...)
+	})
+}
+
 func (p *users) GetByWalletAddr(ctx context.Context, walletAddr string, output interface{}) (err error) {
 	stmt := `
 		SELECT *

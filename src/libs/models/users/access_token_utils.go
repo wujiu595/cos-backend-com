@@ -2,76 +2,23 @@ package users
 
 import (
 	"context"
-	"cos-backend-com/src/common/apierror"
-	"cos-backend-com/src/common/auth"
 	"cos-backend-com/src/common/dbconn"
 	"cos-backend-com/src/common/flake"
-	"cos-backend-com/src/common/util"
-	"cos-backend-com/src/libs/models"
+	"cos-backend-com/src/libs/apierror"
+	"cos-backend-com/src/libs/auth"
+	"cos-backend-com/src/libs/sdk/account"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/wujiu2020/strip/sessions"
-
 	"github.com/wujiu2020/strip/utils"
 )
-
-const (
-	tokenExpiresIn     int64 = 7200
-	refreshExpiresIn   int64 = 86400 * 7
-	PasswordSaltLength       = 8
-)
-
-const (
-	TokenTypeRefreshToken = "refreshtoken"
-	TokenTypeAccessToken  = "accesstoken"
-)
-
-var AccessTokens = &accessTokens{
-	models.DefaultConnector,
-}
-
-type accessTokens struct{ dbconn.Connector }
-
-func (p *accessTokens) NewToken(ctx context.Context, uid flake.ID, ak, sk string) (token *auth.OAuth2Token, err error) {
-
-	netxtId, err := p.nextId(ctx)
-	if err != nil {
-		return
-	}
-
-	token, err = createOAuthToken(netxtId.String(), ak, sk)
-	if err != nil {
-		return
-	}
-
-	query := `
-	INSERT INTO access_tokens
-		(id, uid, token, refresh, key, secret)
-	VALUES (${id}, ${uid}, ${token}, ${refresh}, ${key}, ${secret})
-`
-	query, args := util.PgMapQuery(query, map[string]interface{}{
-		"{id}":      netxtId,
-		"{uid}":     uid,
-		"{token}":   token.AccessToken,
-		"{refresh}": token.RefreshToken,
-		"{key}":     ak,
-		"{secret}":  sk,
-	})
-
-	err = p.Invoke(ctx, func(db dbconn.Q) error {
-		_, er := db.ExecContext(ctx, query, args...)
-		return er
-	})
-	if err != nil {
-		return
-	}
-	return
-}
 
 func createOAuthToken(id, ak, sk string) (token *auth.OAuth2Token, err error) {
 	values := url.Values{}
@@ -121,5 +68,54 @@ func (p *accessTokens) nextId(ctx context.Context) (netxtId flake.ID, err error)
 	err = p.Invoke(ctx, func(db dbconn.Q) error {
 		return db.GetContext(ctx, &netxtId, `SELECT nextval('global_id_sequence')`)
 	})
+	return
+}
+
+func verifyTokenOutter(token string, salt account.TokenType) (raw string, err error) {
+	b, err := base64.StdEncoding.DecodeString(token)
+	if err != nil {
+		return
+	}
+	token = string(b)
+
+	parts := strings.SplitN(token, ":", 2)
+	if len(parts) != 2 {
+		err = errors.New("token verify: invalid size")
+		return
+	}
+
+	h := hmac.New(sha1.New, []byte(salt))
+	h.Write([]byte(parts[0]))
+	if hex.EncodeToString(h.Sum(nil)) != parts[1] {
+		err = errors.New("token verify: invalid token")
+		return
+	}
+
+	return parts[0], nil
+}
+
+func verifyTokenInner(token string, exp int64, ak, sk string) (err error) {
+	_, createAt, ok := sessions.DecodeSecureValue(token, ak+sk)
+	if !ok {
+		err = apierror.ErrApiAuthInvalidToken
+		return
+	}
+
+	if createAt.Add(time.Duration(exp) * time.Second).Before(time.Now()) {
+		err = apierror.ErrApiAuthExpiredToken
+		return
+	}
+	return
+}
+
+func getValuesFromToken(token string) (id string, exp int64, ok bool) {
+	raw := sessions.GetRawFromSecureValue(token)
+	values, err := url.ParseQuery(raw)
+	if err != nil {
+		return
+	}
+	id = values.Get("id")
+	exp, _ = utils.StrTo(values.Get("exp")).Int64()
+	ok = true
 	return
 }
