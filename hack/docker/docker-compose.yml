@@ -17,7 +17,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime
     env_file:
-      - ./ddi-config.env
+      - ./comunion-conf.env
     environment:
       PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
     depends_on:
@@ -32,7 +32,37 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime
     env_file:
-      - ./ddi-config.env
+      - ./comunion-conf.env
+    environment:
+      PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
+    depends_on:
+      - comunion-redis
+    links:
+      - comunion-redis
+    restart: always
+
+  comunion-eth:
+    image: ${COMUNION_CORES_IMAGE}
+    container_name: comunion-cores
+    volumes:
+      - /etc/localtime:/etc/localtime
+    env_file:
+      - ./comunion-conf.env
+    environment:
+      PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
+    depends_on:
+      - comunion-redis
+    links:
+      - comunion-redis
+    restart: always
+
+  comunion-notification:
+    image: ${COMUNION_CORES_IMAGE}
+    container_name: comunion-cores
+    volumes:
+      - /etc/localtime:/etc/localtime
+    env_file:
+      - ./comunion-conf.env
     environment:
       PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
     depends_on:

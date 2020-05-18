@@ -1,9 +1,9 @@
-FROM hub.jimu.io/jimu/alpine
+FROM alpine:3.10
 
-COPY hack/build/account /usr/local/bin/cores
+COPY hack/build/account /usr/local/bin/account
 
 ENV RUN_MODE=prod HTTP_ADDR=0.0.0.0 HTTP_PORT=80
 
 EXPOSE 80
 
-CMD ["cores"]
+CMD ["account"]
