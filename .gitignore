@@ -16,3 +16,4 @@
 /hack/conf/*.*.ini
 /hack/gnorm/export
 /bin
+/hack/build

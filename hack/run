@@ -12,6 +12,17 @@ pg_docker_run(){
     docker run --rm --network host -e PGPASSWORD=${PGPASSWORD} -v `pwd`:/var/lib/postgresql/data -v /tmp:/tmp -w /var/lib/postgresql/data postgres:10.3-alpine "${@}"
 }
 
+function compile() {
+    version=${1:-ci-`date +%s`}
+    for file in ./src/*/cmd/*
+    do
+        app=${file##*/}
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ${file}
+        docker build  -t ${app}:${version} -f ./hack/docker/${app}.Dockerfile .
+    done
+    echo ${version}------------------------------------------------
+}
+
 function start(){
     export RUN_MODE=${RUN_MODE:-dev}
     name=$1
@@ -95,6 +106,9 @@ case "${1}" in
         ;;
     start)
         start ${@:2}
+        ;;
+    compile)
+        compile ${@:2}
         ;;
     gen)
          gen

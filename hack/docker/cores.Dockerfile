@@ -1,4 +1,4 @@
-FROM hub.jimu.io/jimu/alpine
+FROM alpine:3.10
 
 COPY hack/build/cores /usr/local/bin/cores
 
