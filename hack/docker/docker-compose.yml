@@ -42,7 +42,7 @@ services:
     restart: always
 
   comunion-eth:
-    image: ${COMUNION_CORES_IMAGE}
+    image: ${COMUNION_ETH_IMAGE}
     container_name: comunion-cores
     volumes:
       - /etc/localtime:/etc/localtime
@@ -57,7 +57,7 @@ services:
     restart: always
 
   comunion-notification:
-    image: ${COMUNION_CORES_IMAGE}
+    image: ${COMUNION_NOTIFICATION_IMAGE}
     container_name: comunion-cores
     volumes:
       - /etc/localtime:/etc/localtime
