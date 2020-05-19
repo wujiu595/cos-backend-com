@@ -83,16 +83,12 @@ func (p *appConfig) ConfigRoutes() {
 	p.Routers(
 		s.Router("/startups",
 			s.Get(startups.StartUpsHandler{}).Action("List"),
+			s.Post(startups.StartUpsHandler{}).Filter(filters.LoginRequiredInner).Action("Create"),
 			s.Router("/:id",
 				s.Get(startups.StartUpsHandler{}).Action("Get"),
 			),
-		),
-
-		s.Router("/startups",
-			s.Filter(filters.LoginRequiredInner),
-			s.Post(startups.StartUpsHandler{}).Action("Create"),
 			s.Router("/me",
-				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
+				s.Get(startups.StartUpsHandler{}).Filter(filters.LoginRequiredInner).Action("ListMe"),
 			),
 		),
 
