@@ -19,6 +19,8 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+    - name: Go compile
+      run: sh hack/run compile
     - name: Build account
       uses: docker/build-push-action@v1
       with:
