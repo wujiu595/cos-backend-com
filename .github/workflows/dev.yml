@@ -23,10 +23,10 @@ jobs:
       run: go mod download
     - name: Go compile
       run: |
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/account/cmd/account/*
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/cores/cmd/cores/*
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/eth/cmd/eth/*
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/notification/cmd/notification/* 
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/account/cmd/account
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/cores/cmd/cores
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/eth/cmd/eth
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/notification/cmd/notification
     - name: Build account
       uses: docker/build-push-action@v1
       with:
