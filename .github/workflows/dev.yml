@@ -2,86 +2,85 @@ name: Go
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.13
+        id: go
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.13
-      id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-    - name: Install dependencies
-      run: go mod download
-    - name: Go compile
-      run: |
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/account/cmd/account
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/cores/cmd/cores
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/eth/cmd/eth
-        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/notification/cmd/notification
-    - name: Build account
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-        password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
-        registry: registry.comunion.io
-        tags: latest,dev
-        repository: comunion/cos-back-account
-        dockerfile: hack/docker/account.Dockerfile
-    - name: Build cores
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-        password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
-        registry: registry.comunion.io
-        tags: latest,dev
-        repository: comunion/cos-back-cores
-        dockerfile: hack/docker/cores.Dockerfile
-    - name: Build eth
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-        password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
-        registry: registry.comunion.io
-        tags: latest,dev
-        repository: comunion/cos-back-eth
-        dockerfile: hack/docker/eth.Dockerfile
-    - name: Build notification
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-        password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
-        registry: registry.comunion.io
-        tags: latest,dev
-        repository: comunion/cos-back-notification
-        dockerfile: hack/docker/notification.Dockerfile
-    - name: Restart docker
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.DEV_HOST }}
-        username: ${{ secrets.DEV_USERNAME }}
-        passphrase: ${{ secrets.DEV_PASSPHRASE }}
-        key: ${{ secrets.DEV_KEY }}
-        script: ${{ secrets.DEV_RESTART_SCRIPT }}
-    - name: Notification
-      uses: erguotou520/instant-access-action@v1
-      if: ${{ success() }}
-      with:
-        channel: "71c28249ce744d73b2af16b7c5364e45"
-        head: "{{branchName}}部署完成"
-        body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
-    - name: Notification
-      uses: erguotou520/instant-access-action@v1
-      if: ${{ failure() }}
-      with:
-        channel: "71c28249ce744d73b2af16b7c5364e45"
-        head: "{{branchName}}部署失败"
-        body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: go mod download
+      - name: Go compile
+        run: |
+          mkdir -p hack/build
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/account/cmd/account
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/cores/cmd/cores
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/eth/cmd/eth
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -installsuffix cgo -ldflags "-s" -ldflags "${GO_LDFLAGS}" -o ./hack/build ./src/notification/cmd/notification
+      - name: Build account
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+          password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
+          registry: registry.comunion.io
+          tags: latest,dev
+          repository: comunion/cos-back-account
+          dockerfile: hack/docker/account.Dockerfile
+      - name: Build cores
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+          password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
+          registry: registry.comunion.io
+          tags: latest,dev
+          repository: comunion/cos-back-cores
+          dockerfile: hack/docker/cores.Dockerfile
+      - name: Build eth
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+          password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
+          registry: registry.comunion.io
+          tags: latest,dev
+          repository: comunion/cos-back-eth
+          dockerfile: hack/docker/eth.Dockerfile
+      - name: Build notification
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+          password: ${{ secrets.DEV_REGISTRY_PASSWOrD }}
+          registry: registry.comunion.io
+          tags: latest,dev
+          repository: comunion/cos-back-notification
+          dockerfile: hack/docker/notification.Dockerfile
+      - name: Restart docker
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          passphrase: ${{ secrets.DEV_PASSPHRASE }}
+          key: ${{ secrets.DEV_KEY }}
+          script: ${{ secrets.DEV_RESTART_SCRIPT }}
+      - name: Notification
+        uses: erguotou520/instant-access-action@v1
+        if: ${{ success() }}
+        with:
+          channel: "71c28249ce744d73b2af16b7c5364e45"
+          head: "{{branchName}}部署完成"
+          body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
+      - name: Notification
+        uses: erguotou520/instant-access-action@v1
+        if: ${{ failure() }}
+        with:
+          channel: "71c28249ce744d73b2af16b7c5364e45"
+          head: "{{branchName}}部署失败"
+          body: '{{author}} commit "{{commitMessage}}" on {{repositoryName}}#{{branchName}} branch at {{commitTime}}'
