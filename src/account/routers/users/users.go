@@ -3,12 +3,11 @@ package users
 import (
 	"cos-backend-com/src/account/routers"
 	"cos-backend-com/src/common/flake"
+	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models/users"
+	"cos-backend-com/src/libs/sdk/account"
 
 	"github.com/wujiu2020/strip/utils/apires"
-
-	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/sdk/account"
 )
 
 type Users struct {
@@ -24,7 +23,7 @@ func (h *Users) GetMe() (res interface{}) {
 		return
 	}
 
-	var user account.UsersResult
+	var user account.UserResult
 	if err := users.Users.Get(h.Ctx, h.Uid, &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)

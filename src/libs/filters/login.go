@@ -26,7 +26,7 @@ func LoginRequiredInner(ctx strip.Context, log strip.ReqLogger, rw http.Response
 		}
 	}()
 
-	var info *account.UsersResult
+	var info *account.UserResult
 	ctx.Exists(&info, "")
 	if info != nil {
 		return
