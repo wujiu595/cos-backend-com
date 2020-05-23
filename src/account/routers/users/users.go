@@ -3,12 +3,11 @@ package users
 import (
 	"cos-backend-com/src/account/routers"
 	"cos-backend-com/src/common/flake"
+	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models/users"
+	"cos-backend-com/src/libs/sdk/account"
 
 	"github.com/wujiu2020/strip/utils/apires"
-
-	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/sdk/account"
 )
 
 type Users struct {

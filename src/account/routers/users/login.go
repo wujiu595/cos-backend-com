@@ -9,9 +9,7 @@ import (
 	"cos-backend-com/src/libs/sdk/account"
 
 	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/ethereum/go-ethereum/common/hexutil"
-
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/wujiu2020/strip/caches"
 	"github.com/wujiu2020/strip/sessions"
