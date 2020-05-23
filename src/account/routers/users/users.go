@@ -24,7 +24,7 @@ func (h *Users) GetMe() (res interface{}) {
 		return
 	}
 
-	var user account.UsersResult
+	var user account.UserResult
 	if err := users.Users.Get(h.Ctx, h.Uid, &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)

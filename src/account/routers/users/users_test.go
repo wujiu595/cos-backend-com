@@ -1,36 +1,38 @@
 package users
 
 import (
-	"cos-backend-com/src/account/routers"
-	"cos-backend-com/src/common/flake"
-	"cos-backend-com/src/libs/models/users"
+	"crypto/ecdsa"
+	"fmt"
+	"log"
+	"testing"
 
-	"github.com/wujiu2020/strip/utils/apires"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/sdk/account"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
-type Users struct {
-	routers.Base
-	Uid flake.ID `inject:"uid"`
-}
-
-func (h *Users) GetMe() (res interface{}) {
-	var input account.LoginInput
-	if err := h.Params.BindJsonBody(&input); err != nil {
-		h.Log.Warn(err)
-		res = apierror.ErrBadRequest.WithData(err)
-		return
+func TestPrivateKey(t *testing.T) {
+	privateKey, err := crypto.HexToECDSA("fad9c8855b740a0b7ed4c221dbad0f33a83a49cad6b3fe8d5817ac83d38b6a19")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	var user account.UsersResult
-	if err := users.Users.Get(h.Ctx, h.Uid, &user); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		log.Fatal("error casting public key to ECDSA")
 	}
 
-	res = apires.With(user)
-	return
+	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
+	data := []byte("hello")
+	hash := crypto.Keccak256Hash(data)
+
+	fmt.Println(hash.Hex()) // 0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8
+
+	signature, err := crypto.Sign(hash.Bytes(), privateKey)
+	signatureString := hexutil.Encode(signature)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%v/n%v", signatureString, publicKeyBytes)
 }

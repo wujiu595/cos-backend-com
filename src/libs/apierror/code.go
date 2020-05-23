@@ -48,26 +48,13 @@ var (
 
 // 业务错误
 var (
-	ErrApiAuthInvalidHeader    = New(401, 20000, "authorization not in request headers")
-	ErrApiAuthInvalidToken     = New(401, 20001, "invalid token")
-	ErrApiAuthInvalidType      = New(401, 20002, "invalid auth type")
-	ErrApiAuthInvalidInfo      = New(401, 20003, "invalid auth info")
-	ErrApiAuthExpiredToken     = New(401, 20004, "expired token")
-	ErrApiAuthUserNotFound     = New(403, 20005, "user info not found")
-	ErrApiAuthNeedSSL          = New(403, 20006, "please access api with ssl")
-	ErrApiAuthInActived        = New(403, 20007, "inactived")
-	ErrApiAuthCreateFailed     = New(403, 20008, "token create failed")
-	ErrApiAuthWrongSuInfo      = New(401, 20009, "invalid su info")
-	ErrApiAuthSuNoPerm         = New(403, 20010, "no permission to su")
-	ErrEnterpriseDisabled      = New(403, 20011, "enterprise is disabled")
-	ErrEnterpriseExpired       = New(403, 20012, "enterprise expired")
-	ErrEnterpriseCodeNotExists = New(404, 20013, "enterprise code not exists")
-
-	ErrAuthTypeNotSupport   = New(403, 20100, "auth type not support")
-	ErrAuthInfoInvalid      = New(403, 20101, "invalid auth info")
-	ErrAuthCodeInvalid      = New(403, 20102, "invalid auth code")
-	ErrAuthTimesExceedLimit = New(403, 20103, "auth times exceed limit")
-	ErrPleaseWaitAMoment    = New(403, 20104, "please wait a moment")
+	ErrApiAuthInvalidHeader = New(401, 20000, "authorization not in request headers")
+	ErrApiAuthInvalidToken  = New(401, 20001, "invalid token")
+	ErrApiAuthInvalidType   = New(401, 20002, "invalid auth type")
+	ErrApiAuthInvalidInfo   = New(401, 20003, "invalid auth info")
+	ErrApiAuthExpiredToken  = New(401, 20004, "expired token")
+	ErrApiAuthCreateFailed  = New(403, 20008, "token create failed")
+	ErrInvalidSignature     = New(401, 20009, "invalid signature")
 )
 
 func HandleError(err error) *apires.ResError {

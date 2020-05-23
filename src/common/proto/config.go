@@ -1,10 +1,11 @@
 package proto
 
 type CommonEnvConfig struct {
-	TmpDir string       `conf:"tmp_dir"`
-	PG     PGConfig     `conf:"pg"`
-	Redis  RedisConfig  `conf:"redis"`
-	Jaeger JaegerConfig `conf:"jaeger"`
+	ChainAddr string       `conf:"chain_addr"`
+	TmpDir    string       `conf:"tmp_dir"`
+	PG        PGConfig     `conf:"pg"`
+	Redis     RedisConfig  `conf:"redis"`
+	Jaeger    JaegerConfig `conf:"jaeger"`
 }
 
 type ServiceEndpoint struct {

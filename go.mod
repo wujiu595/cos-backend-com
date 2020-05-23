@@ -6,6 +6,7 @@ require (
 	github.com/boombuler/barcode v1.0.0
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/ethereum/go-ethereum v1.9.14
 	github.com/go-ini/ini v1.56.0 // indirect
 	github.com/go-playground/form v3.1.4+incompatible
 	github.com/go-playground/locales v0.13.0
