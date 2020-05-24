@@ -46,14 +46,14 @@ func (p *users) Get(ctx context.Context, id flake.ID, output interface{}) (err e
 	})
 }
 
-func (p *users) GetByPublicAddr(ctx context.Context, publicAddr string, output interface{}) (err error) {
+func (p *users) GetBypublicKey(ctx context.Context, publicKey string, output interface{}) (err error) {
 	stmt := `
 		SELECT *
 		FROM users
-		WHERE public_addr = ${publicAddr};
+		WHERE public_key = ${publicKey};
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{publicAddr}": publicAddr,
+		"{publicKey}": publicKey,
 	})
 
 	return p.Invoke(ctx, func(db dbconn.Q) error {
@@ -61,19 +61,19 @@ func (p *users) GetByPublicAddr(ctx context.Context, publicAddr string, output i
 	})
 }
 
-func (p *users) Create(ctx context.Context, publicAddr string, output interface{}) (err error) {
+func (p *users) Create(ctx context.Context, publicKey string, output interface{}) (err error) {
 	nonce := CreateNonce()
 	uid, err := p.nextId(ctx)
 	if err != nil {
 		return err
 	}
 	stmt := `
-		INSERT INTO users(public_addr,private_secret,public_secret, nonce)
-		VALUES (${publicAddr}, ${private_secret}, ${public_secret}, ${nonce})
+		INSERT INTO users(public_key,private_secret,public_secret, nonce)
+		VALUES (${publicKey}, ${private_secret}, ${public_secret}, ${nonce})
 		RETURNING *;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{publicAddr}":     publicAddr,
+		"{publicKey}":      publicKey,
 		"{nonce}":          nonce,
 		"{private_secret}": CreateAccessKey(uid),
 		"{public_secret}":  CreateSecretKey(),
@@ -99,8 +99,8 @@ func (p *users) UpdateNonce(ctx context.Context, id flake.ID, output interface{}
 	})
 }
 
-func (p *users) FindOrCreate(ctx context.Context, publicAddr string, output *account.UsersModel) (err error) {
-	if err := p.GetByPublicAddr(ctx, publicAddr, output); err != nil {
+func (p *users) FindOrCreate(ctx context.Context, publicKey string, output *account.UsersModel) (err error) {
+	if err := p.GetBypublicKey(ctx, publicKey, output); err != nil {
 		if err != sql.ErrNoRows {
 			return err
 		}
@@ -111,7 +111,7 @@ func (p *users) FindOrCreate(ctx context.Context, publicAddr string, output *acc
 		}
 		return
 	}
-	return p.Create(ctx, publicAddr, output)
+	return p.Create(ctx, publicKey, output)
 }
 
 func (p *users) nextId(ctx context.Context) (netxtId flake.ID, err error) {

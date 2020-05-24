@@ -32,13 +32,13 @@ func (h *Guest) Login() (res interface{}) {
 		return
 	}
 	var user account.UsersModel
-	if err := users.Users.GetByPublicAddr(h.Ctx, input.PublicAddr, &user); err != nil {
+	if err := users.Users.GetBypublicKey(h.Ctx, input.PublicKey, &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
 	}
 	//get nonce hash
-	nonceBytes, err := hexutil.Decode(user.Nonce)
+	nonceBytes, err := hexutil.Decode(account.DefaultNoncePrefix + user.Nonce)
 	if err != nil {
 		h.Log.Warn(err)
 		res = apierror.ErrInvalidSignature.WithData(err)
@@ -62,7 +62,7 @@ func (h *Guest) Login() (res interface{}) {
 	}
 	//get sig public add
 	sigPublicAddr := common.BytesToAddress(crypto.Keccak256(sigPublicAddrBytes[1:])[12:]).Hex()
-	if sigPublicAddr != input.PublicAddr {
+	if sigPublicAddr != input.PublicKey {
 		res = apierror.ErrInvalidSignature.WithData(err)
 		return
 	}
@@ -74,9 +74,9 @@ func (h *Guest) Login() (res interface{}) {
 	}
 
 	res = apires.With(account.UserResult{
-		Id:         user.Id,
-		PublicAddr: user.PublicAddr,
-		IsHunter:   user.IsHunter,
+		Id:        user.Id,
+		PublicKey: user.PublicKey,
+		IsHunter:  user.IsHunter,
 	})
 	return
 }
@@ -97,7 +97,7 @@ func (h *Guest) GetNonce() (res interface{}) {
 	}
 
 	res = apires.With(account.GetNonceOutput{
-		Nonce: user.Nonce,
+		Nonce: account.DefaultNoncePrefix + user.Nonce,
 	})
 	return
 }

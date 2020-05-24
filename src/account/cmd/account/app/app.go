@@ -101,7 +101,7 @@ func (p *appConfig) ConfigRoutes() {
 			s.Post(users.Guest{}).Action("Login"),
 		),
 		s.Router("/nonce",
-			s.Get(users.Guest{}).Action("GetNonce"),
+			s.Post(users.Guest{}).Action("GetNonce"),
 		),
 		s.Router("/users/me",
 			s.Get(users.Users{}).Filter(filters.LoginRequiredInner).Action("GetMe"),

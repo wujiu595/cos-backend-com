@@ -11,7 +11,7 @@ type Signature string
 
 type UsersModel struct {
 	Id            flake.ID  `json:"id" db:"id"`                        // id (PK)
-	PublicAddr    string    `json:"publicAddr" db:"public_addr"`       // public_key
+	PublicKey     string    `json:"PublicKey" db:"public_key"`         // public_key
 	Nonce         string    `json:"nonce" db:"nonce"`                  // nonce
 	PublicSecret  string    `json:"publicSecret" db:"public_secret"`   // public_secret
 	PrivateSecret string    `json:"privateSecret" db:"private_secret"` // private_secret
@@ -29,12 +29,12 @@ type GetNonceOutput struct {
 }
 
 type LoginInput struct {
-	PublicAddr string `json:"publicKey" validate:"func "`
-	Signature  string `json:"signature"`
+	PublicKey string `json:"publicKey" validate:"func "`
+	Signature string `json:"signature"`
 }
 
 type UserResult struct {
-	Id         flake.ID `json:"id" db:"id"`                // id (PK)
-	PublicAddr string   `json:"publicKey" db:"public_key"` // wallet_addr
-	IsHunter   bool     `json:"isHunter" db:"is_hunter"`   // is_hunter
+	Id        flake.ID `json:"id" db:"id"`                // id (PK)
+	PublicKey string   `json:"publicKey" db:"public_key"` // wallet_addr
+	IsHunter  bool     `json:"isHunter" db:"is_hunter"`   // is_hunter
 }

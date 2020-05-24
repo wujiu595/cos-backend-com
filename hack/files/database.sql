@@ -159,7 +159,7 @@ COMMENT ON COLUMN comunion.startups.state IS '0 创建中,1 已创建,2 未确�
 
 CREATE TABLE comunion.users (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
-    public_addr text NOT NULL,
+    public_key text NOT NULL,
     nonce text NOT NULL,
     public_secret text NOT NULL,
     private_secret text NOT NULL,
@@ -239,7 +239,7 @@ CREATE UNIQUE INDEX start_ups_tx_id ON comunion.startups USING btree (tx_id);
 -- Name: users_wallet_addr; Type: INDEX; Schema: comunion; Owner: -
 --
 
-CREATE UNIQUE INDEX users_public_addr ON comunion.users USING btree (public_addr);
+CREATE UNIQUE INDEX users_public_key ON comunion.users USING btree (public_key);
 
 
 --
