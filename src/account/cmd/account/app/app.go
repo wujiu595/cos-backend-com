@@ -10,6 +10,7 @@ import (
 	"cos-backend-com/src/common/util"
 	"cos-backend-com/src/libs/auth"
 	"cos-backend-com/src/libs/filters"
+	"cos-backend-com/src/libs/sdk/web3"
 	"net/http"
 	"os"
 
@@ -88,6 +89,7 @@ func (p *appConfig) ConfigProviders() {
 
 	p.Provide(auth.AuthTransportProvider(oauth2TokenURL))
 	p.ProvideAs(cache, (*caches.CacheProvider)(nil))
+	p.Provide(web3.NewWeb3Service(account.Env.Service.Web3))
 	p.Provide(providers.SessionLimiter(redisPool))
 }
 
@@ -104,7 +106,7 @@ func (p *appConfig) ConfigRoutes() {
 			s.Post(users.Guest{}).Action("GetNonce"),
 		),
 		s.Router("/users/me",
-			s.Get(users.Users{}).Filter(filters.LoginRequiredInner).Action("GetMe"),
+			s.Get(users.Users{}).Filter(filters.LoginRequiredInner).Action("Me"),
 		),
 		s.Router("/oauth2/token",
 			s.Post(&oauth.Token{}).Action("GrantToken"),

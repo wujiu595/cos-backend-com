@@ -13,6 +13,7 @@ type ServiceEndpoint struct {
 	Cores        string `conf:"cores"`
 	Notification string `conf:"notification"`
 	Eth          string `conf:"eth"`
+	Web3         string `conf:"web3"`
 }
 
 type PGConfig struct {
