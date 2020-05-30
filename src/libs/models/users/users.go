@@ -85,7 +85,7 @@ func (p *users) Create(ctx context.Context, publicKey string, output interface{}
 }
 
 func (p *users) UpdateNonce(ctx context.Context, id flake.ID, output interface{}) (err error) {
-	nonce := account.DefaultNoncePrefix + CreateNonce()
+	nonce := CreateNonce()
 	stmt := `
 		UPDATE users SET nonce = ${nonce} WHERE id = ${id} RETURNING *;
 	`
