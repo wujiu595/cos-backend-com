@@ -7,10 +7,9 @@ import (
 	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models/users"
 	"cos-backend-com/src/libs/sdk/account"
+	"cos-backend-com/src/libs/sdk/web3"
+	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/wujiu2020/strip/caches"
 	"github.com/wujiu2020/strip/sessions"
 	"github.com/wujiu2020/strip/utils/apires"
@@ -19,6 +18,7 @@ import (
 type Guest struct {
 	routers.Base
 	Helper         sigin.SignHelper
+	Web3Service    web3.Web3Service      `inject`
 	Sess           sessions.SessionStore `inject`
 	Cache          caches.CacheProvider  `inject`
 	SessionLimiter *sesslimiter.Limiter  `inject`
@@ -37,33 +37,19 @@ func (h *Guest) Login() (res interface{}) {
 		res = apierror.HandleError(err)
 		return
 	}
-	//get nonce hash
-	nonceBytes, err := hexutil.Decode(account.DefaultNoncePrefix + user.Nonce)
-	if err != nil {
-		h.Log.Warn(err)
-		res = apierror.ErrInvalidSignature.WithData(err)
-		return
-	}
 	//get signature hash
-	signatureBytes, err := hexutil.Decode(input.Signature)
+	ecrecoverOutput, err := h.Web3Service.Ecrecover(h.Ctx, &web3.EcrecoverInput{
+		Nonce:     account.DefaultNoncePrefix + user.Nonce,
+		Signature: input.Signature,
+	})
 	if err != nil {
 		h.Log.Warn(err)
-		res = apierror.ErrInvalidSignature.WithData(err)
+		res = apierror.HandleError(err)
 		return
 	}
-	// web3 produce signature make recover id += 27
-	signatureBytes[64] -= 27
-	//ecrecover get sign public key hash
-	sigPublicAddrBytes, err := crypto.Ecrecover(nonceBytes, signatureBytes)
-	if err != nil {
-		h.Log.Warn(err)
-		res = apierror.ErrInvalidSignature.WithData(err)
-		return
-	}
-	//get sig public add
-	sigPublicAddr := common.BytesToAddress(crypto.Keccak256(sigPublicAddrBytes[1:])[12:]).Hex()
-	if sigPublicAddr != input.PublicKey {
-		res = apierror.ErrInvalidSignature.WithData(err)
+
+	if strings.ToLower(ecrecoverOutput.PublicKey) != strings.ToLower(input.PublicKey) {
+		res = apierror.ErrInvalidSignature
 		return
 	}
 
@@ -90,7 +76,7 @@ func (h *Guest) GetNonce() (res interface{}) {
 	}
 
 	var user account.UsersModel
-	if err := users.Users.FindOrCreate(h.Ctx, input.PublicAddr, &user); err != nil {
+	if err := users.Users.FindOrCreate(h.Ctx, strings.ToLower(input.PublicAddr), &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return

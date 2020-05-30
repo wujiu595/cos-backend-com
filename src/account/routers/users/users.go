@@ -15,7 +15,7 @@ type Users struct {
 	Uid flake.ID `inject:"uid"`
 }
 
-func (h *Users) GetMe() (res interface{}) {
+func (h *Users) Me() (res interface{}) {
 	var input account.LoginInput
 	if err := h.Params.BindJsonBody(&input); err != nil {
 		h.Log.Warn(err)

@@ -29,7 +29,7 @@ type GetNonceOutput struct {
 }
 
 type LoginInput struct {
-	PublicKey string `json:"publicKey" validate:"func "`
+	PublicKey string `json:"publicKey"`
 	Signature string `json:"signature"`
 }
 

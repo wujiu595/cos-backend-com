@@ -22,11 +22,11 @@ type startUps struct {
 	dbconn.Connector
 }
 
-func (c *startUps) List(ctx context.Context, uid *flake.ID, input *coresSdk.ListStartUpsInput, outputs interface{}) (total int, err error) {
+func (c *startUps) List(ctx context.Context, uid flake.ID, input *coresSdk.ListStartUpsInput, outputs interface{}) (total int, err error) {
 	plan := &dbquery.Plan{}
 	plan.RetTotal = true
 
-	if uid != nil {
+	if uid != 0 {
 		plan.AddCond(`AND t.uid = ${uid}`)
 	}
 	if input.CategoryId != flake.ID(0) {
