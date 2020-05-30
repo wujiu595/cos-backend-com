@@ -34,7 +34,7 @@ func (h *Guest) Login() (res interface{}) {
 	var user account.UsersModel
 	if err := users.Users.GetBypublicKey(h.Ctx, input.PublicKey, &user); err != nil {
 		h.Log.Warn(err)
-		res = apierror.HandleError(err)
+		res = apierror.ErrInvalidSignature.WithMsg(err.Error())
 		return
 	}
 	//get signature hash
@@ -44,7 +44,7 @@ func (h *Guest) Login() (res interface{}) {
 	})
 	if err != nil {
 		h.Log.Warn(err)
-		res = apierror.HandleError(err)
+		res = apierror.ErrInvalidSignature.WithMsg(err.Error())
 		return
 	}
 
