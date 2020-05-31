@@ -21,7 +21,7 @@ type UsersModel struct {
 }
 
 type GetNonceInput struct {
-	PublicAddr string `json:"publicKey"`
+	PublicKey string `json:"publicKey"`
 }
 
 type GetNonceOutput struct {
