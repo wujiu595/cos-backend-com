@@ -8,6 +8,7 @@ import (
 	"cos-backend-com/src/libs/models/users"
 	"cos-backend-com/src/libs/sdk/account"
 	"cos-backend-com/src/libs/sdk/web3"
+	"net/http"
 	"strings"
 
 	"github.com/wujiu2020/strip/caches"
@@ -67,6 +68,13 @@ func (h *Guest) Login() (res interface{}) {
 	return
 }
 
+func (h *Guest) Logout() (res interface{}) {
+	h.Helper.Signout()
+
+	res = apires.Ret(http.StatusOK)
+	return
+}
+
 func (h *Guest) GetNonce() (res interface{}) {
 	var input account.GetNonceInput
 	if err := h.Params.BindJsonBody(&input); err != nil {
@@ -74,9 +82,10 @@ func (h *Guest) GetNonce() (res interface{}) {
 		res = apierror.ErrBadRequest.WithData(err)
 		return
 	}
+	//todo add publicKey check
 
 	var user account.UsersModel
-	if err := users.Users.FindOrCreate(h.Ctx, strings.ToLower(input.PublicAddr), &user); err != nil {
+	if err := users.Users.FindOrCreate(h.Ctx, strings.ToLower(input.PublicKey), &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
