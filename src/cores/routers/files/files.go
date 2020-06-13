@@ -30,7 +30,7 @@ func (h *FilesHandler) SignUploadFile() (res interface{}) {
 	}
 
 	res = apires.With(files.DownloadOutput{
-		DownloadUrl: objName,
+		DownloadUrl: cores.Env.Minio.StaticBucket + "/" + objName,
 	}, http.StatusOK)
 	return res
 }
