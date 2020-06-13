@@ -5,7 +5,7 @@ import (
 	"cos-backend-com/src/account/routers/sigin"
 	"cos-backend-com/src/common/sesslimiter"
 	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/models/users"
+	"cos-backend-com/src/libs/models/usermodels"
 	"cos-backend-com/src/libs/sdk/account"
 	"cos-backend-com/src/libs/sdk/web3"
 	"net/http"
@@ -33,7 +33,7 @@ func (h *Guest) Login() (res interface{}) {
 		return
 	}
 	var user account.UsersModel
-	if err := users.Users.GetBypublicKey(h.Ctx, input.PublicKey, &user); err != nil {
+	if err := usermodels.Users.GetBypublicKey(h.Ctx, input.PublicKey, &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.ErrInvalidSignature.WithMsg(err.Error())
 		return
@@ -85,7 +85,7 @@ func (h *Guest) GetNonce() (res interface{}) {
 	//todo add publicKey check
 
 	var user account.UsersModel
-	if err := users.Users.FindOrCreate(h.Ctx, strings.ToLower(input.PublicKey), &user); err != nil {
+	if err := usermodels.Users.FindOrCreate(h.Ctx, strings.ToLower(input.PublicKey), &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return

@@ -3,7 +3,7 @@ package oauth
 import (
 	"cos-backend-com/src/account/routers"
 	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/models/users"
+	"cos-backend-com/src/libs/models/usermodels"
 	"cos-backend-com/src/libs/sdk/account"
 
 	"github.com/wujiu2020/strip/utils/apires"
@@ -49,7 +49,7 @@ func (p *Token) GrantToken() (res interface{}) {
 }
 
 func (p *Token) grantByRefreshToken(refreshToken string) (res interface{}) {
-	tokenInfo, err := users.AccessTokens.VerifyToken(p.Ctx, refreshToken, account.TokenTypeRefreshToken)
+	tokenInfo, err := usermodels.AccessTokens.VerifyToken(p.Ctx, refreshToken, account.TokenTypeRefreshToken)
 	if err != nil {
 		p.Log.Warn("accountmodels.AccessTokens.VerifyToken:", err)
 		res = apierror.HandleError(err)
@@ -58,7 +58,7 @@ func (p *Token) grantByRefreshToken(refreshToken string) (res interface{}) {
 
 	p.Log.Infof("refresh_token ak: %s, uid: %d", tokenInfo.Key, tokenInfo.UId)
 
-	token, err := users.AccessTokens.RefreshToken(p.Ctx, tokenInfo)
+	token, err := usermodels.AccessTokens.RefreshToken(p.Ctx, tokenInfo)
 	if err != nil {
 		p.Log.Warn("accountmodels.AccessTokens.RefreshToken:", err)
 		res = apierror.HandleError(err)
@@ -77,7 +77,7 @@ func (p *Token) grantByClientCredentials(ak, sk string) (res interface{}) {
 	}
 
 	var access account.AccessTokensResult
-	err := users.AccessKeys.FindByAccessKey(p.Ctx, ak, &access)
+	err := usermodels.AccessKeys.FindByAccessKey(p.Ctx, ak, &access)
 	if err != nil {
 		p.Log.Warnf("access key of `%s` FindByAccessKey: %v", ak, err)
 		res = apierror.HandleError(apierror.ErrApiAuthInvalidInfo)
@@ -92,7 +92,7 @@ func (p *Token) grantByClientCredentials(ak, sk string) (res interface{}) {
 		return
 	}
 
-	token, err := users.AccessTokens.NewToken(p.Ctx, access.UId, access.Key, access.Secret)
+	token, err := usermodels.AccessTokens.NewToken(p.Ctx, access.UId, access.Key, access.Secret)
 	if err != nil {
 		p.Log.Warn("accountmodels.CreateAccessToken:", err)
 		res = apierror.HandleError(apierror.ErrApiAuthCreateFailed)

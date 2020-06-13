@@ -5,7 +5,7 @@ import (
 	"cos-backend-com/src/common/validate"
 	"cos-backend-com/src/cores/routers"
 	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/models/startups"
+	"cos-backend-com/src/libs/models/startupmodels"
 	"cos-backend-com/src/libs/sdk/cores"
 	"net/http"
 
@@ -17,7 +17,7 @@ type StartUpsHandler struct {
 }
 
 func (h *StartUpsHandler) List() (res interface{}) {
-	var params cores.ListStartUpsInput
+	var params cores.ListStartupsInput
 	h.Params.BindValuesToStruct(&params)
 
 	if err := validate.Default.Struct(params); err != nil {
@@ -26,8 +26,8 @@ func (h *StartUpsHandler) List() (res interface{}) {
 		return
 	}
 
-	var output cores.ListStartUpsResult
-	total, err := startups.StartUps.List(h.Ctx, 0, &params, &output.Result)
+	var output cores.ListStartupsResult
+	total, err := startupmodels.Startups.List(h.Ctx, &params, &output.Result)
 	if err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
@@ -40,7 +40,7 @@ func (h *StartUpsHandler) List() (res interface{}) {
 }
 
 func (h *StartUpsHandler) ListMe() (res interface{}) {
-	var params cores.ListStartUpsInput
+	var params cores.ListStartupsInput
 	h.Params.BindValuesToStruct(&params)
 
 	if err := validate.Default.Struct(params); err != nil {
@@ -50,8 +50,8 @@ func (h *StartUpsHandler) ListMe() (res interface{}) {
 	}
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
-	var output cores.ListStartUpsResult
-	total, err := startups.StartUps.List(h.Ctx, uid, &params, &output.Result)
+	var output cores.ListStartupsResult
+	total, err := startupmodels.Startups.ListMe(h.Ctx, uid, &params, &output.Result)
 	if err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
@@ -64,7 +64,7 @@ func (h *StartUpsHandler) ListMe() (res interface{}) {
 }
 
 func (h *StartUpsHandler) Create() (res interface{}) {
-	var input cores.CreateStartUpsInput
+	var input cores.CreateStartupInput
 	if err := h.Params.BindJsonBody(&input); err != nil {
 		h.Log.Warn(err)
 		res = apierror.ErrBadRequest.WithData(err)
@@ -79,20 +79,22 @@ func (h *StartUpsHandler) Create() (res interface{}) {
 
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
-	var output cores.StartUpsResult
-	if err := startups.StartUps.Create(h.Ctx, uid, &input, &output); err != nil {
+	var startupIdResult cores.StartupIdResult
+	if err := startupmodels.Startups.CreateWithRevision(h.Ctx, uid, &input, &startupIdResult.Id); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
 	}
 
-	res = apires.With(&output, http.StatusCreated)
+	res = apires.With(&startupIdResult, http.StatusCreated)
 	return
 }
 
 func (h *StartUpsHandler) Get(id flake.ID) (res interface{}) {
-	var output cores.StartUpsResult
-	if err := startups.StartUps.Get(h.Ctx, 0, id, &output); err != nil {
+	var uid flake.ID
+	h.Ctx.Find(&uid, "uid")
+	var output cores.StartUpResult
+	if err := startupmodels.Startups.Get(h.Ctx, uid, id, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
@@ -102,28 +104,43 @@ func (h *StartUpsHandler) Get(id flake.ID) (res interface{}) {
 	return
 }
 
-// TODO: 删除本行表示您已确认下方func已完成
-//func (h *StartUpsHandler) Update(id flake.ID) (res interface{}) {
-//	var input cores.StartUpsInput
-//	if err := h.Params.BindJsonBody(&input); err != nil {
-//		h.Log.Warn(err)
-//		res = apierror.ErrBadRequest.WithData(err)
-//		return
-//	}
-//
-//	if err := validate.Default.Struct(input); err != nil {
-//		h.Log.Warn(err)
-//		res = apierror.HandleError(err)
-//		return
-//	}
-//
-//	var output cores.StartUpsResult
-//	if err := startups.StartUps.Update(h.Ctx, h.AcRes.TokenInfo.EnterpriseId, id, &input, &output); err != nil {
-//		h.Log.Warn(err)
-//		res = apierror.HandleError(err)
-//		return
-//	}
-//
-//	res = apires.With(&output, http.StatusOK)
-//	return
-//}
+func (h *StartUpsHandler) Update(id flake.ID) (res interface{}) {
+	var input cores.UpdateStartupInput
+	if err := h.Params.BindJsonBody(&input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.ErrBadRequest.WithData(err)
+		return
+	}
+
+	if err := validate.Default.Struct(input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	var uid flake.ID
+	h.Ctx.Find(&uid, "uid")
+	var startupIdResult cores.StartupIdResult
+	if err := startupmodels.Startups.UpdateWithRevision(h.Ctx, uid, id, &input, &startupIdResult.Id); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&startupIdResult, http.StatusCreated)
+	return
+}
+
+func (h *StartUpsHandler) Restore(id flake.ID) (res interface{}) {
+	var uid flake.ID
+	h.Ctx.Find(&uid, "uid")
+	var startupIdResult cores.StartupIdResult
+	if err := startupmodels.Startups.Restore(h.Ctx, uid, id); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&startupIdResult, http.StatusCreated)
+	return
+}

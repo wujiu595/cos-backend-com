@@ -5,7 +5,7 @@ import (
 	"cos-backend-com/src/common/validate"
 	"cos-backend-com/src/cores/routers"
 	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/models/categories"
+	"cos-backend-com/src/libs/models/categorymodels"
 	"cos-backend-com/src/libs/sdk/cores"
 	"net/http"
 
@@ -27,7 +27,7 @@ func (h *CategoriesHandler) List() (res interface{}) {
 	}
 
 	var output cores.ListCategoriesResult
-	total, err := categories.Categories.List(h.Ctx, &params, &output.Result)
+	total, err := categorymodels.Categories.List(h.Ctx, &params, &output.Result)
 	if err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
@@ -41,7 +41,7 @@ func (h *CategoriesHandler) List() (res interface{}) {
 
 func (h *CategoriesHandler) Get(id flake.ID) (res interface{}) {
 	var output cores.CategoriesResult
-	if err := categories.Categories.Get(h.Ctx, id, &output); err != nil {
+	if err := categorymodels.Categories.Get(h.Ctx, id, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return

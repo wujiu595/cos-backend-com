@@ -4,7 +4,7 @@ import (
 	. "context"
 	"cos-backend-com/src/common/flake"
 	"cos-backend-com/src/libs/auth"
-	"cos-backend-com/src/libs/models/users"
+	"cos-backend-com/src/libs/models/usermodels"
 	"net/http"
 	"strings"
 	"time"
@@ -23,7 +23,7 @@ type SignHelper struct {
 }
 
 func (p *SignHelper) SigninUser(ctx Context, uid flake.ID, publicSecret, privateSecret string) (sess sessions.SessionStore, err error) {
-	oauthToken, err := users.AccessTokens.NewToken(ctx, uid, publicSecret, privateSecret)
+	oauthToken, err := usermodels.AccessTokens.NewToken(ctx, uid, publicSecret, privateSecret)
 	if err != nil {
 		return
 	}
