@@ -26,3 +26,13 @@ services:
       - POSTGRES_USER=comunion2020
       - POSTGRES_PASSWORD=comunion2020
       - POSTGRES_DB=comunion
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - 9000:9000
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command:  server /data

@@ -150,12 +150,12 @@ CREATE TABLE comunion.startup_setting_revisions (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
     startup_setting_id bigint NOT NULL,
     token_name text NOT NULL,
-    token_symbol bigint NOT NULL,
+    token_symbol text NOT NULL,
     token_addr text,
     wallet_addrs jsonb DEFAULT '[]'::jsonb NOT NULL,
     type text NOT NULL,
     vote_token_limit bigint,
-    vote_assign_addrs text[] DEFAULT '{}'::text[] NOT NULL,
+    vote_assign_addrs text[],
     vote_support_percent integer NOT NULL,
     vote_min_approval_percent integer NOT NULL,
     vote_min_duration_hours bigint NOT NULL,
@@ -180,7 +180,7 @@ CREATE TABLE comunion.startup_settings (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
     startup_id bigint NOT NULL,
     current_revision_id bigint,
-    confirming_revision_id bigint NOT NULL,
+    confirming_revision_id bigint,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -212,8 +212,8 @@ CREATE TABLE comunion.transactions (
     source text NOT NULL,
     source_id bigint NOT NULL,
     retry_time integer DEFAULT 0 NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     state integer DEFAULT 1 NOT NULL
 );
 
@@ -357,7 +357,7 @@ CREATE UNIQUE INDEX startup_settings_startup_id ON comunion.startup_settings USI
 -- Name: startups_name_idx; Type: INDEX; Schema: comunion; Owner: -
 --
 
-CREATE UNIQUE INDEX startups_name_idx ON comunion.startups USING btree (name);
+CREATE UNIQUE INDEX startups_name_idx ON comunion.startups USING btree (name) WHERE ((current_revision_id IS NOT NULL) AND (confirming_revision_id IS NOT NULL));
 
 
 --

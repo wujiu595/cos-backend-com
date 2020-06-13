@@ -20,4 +20,13 @@ type Config struct {
 
 	// 内部服务
 	Service proto.ServiceEndpoint `conf:"service"`
+
+	Minio struct {
+		Endpoint  string `conf:"endpoint"`
+		Secure    bool   `conf:"secure"`
+		AccessKey string `conf:"access_key"`
+		SecretKey string `conf:"secret_key"`
+
+		StaticBucket string `conf:"static_bucket"`
+	} `conf:"minio"`
 }

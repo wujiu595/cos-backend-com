@@ -1,6 +1,10 @@
 package app
 
 import (
+	"cos-backend-com/src/common/dbconn"
+	"cos-backend-com/src/common/proto"
+	"cos-backend-com/src/common/providers"
+	"cos-backend-com/src/common/util"
 	"database/sql"
 	"os"
 	"os/signal"
@@ -13,12 +17,6 @@ import (
 	"github.com/wujiu2020/sqlhooks"
 	"github.com/wujiu2020/strip"
 	"github.com/wujiu2020/strip/utils/helpers"
-
-	"cos-backend-com/src/common/dbconn"
-	"cos-backend-com/src/common/filters"
-	"cos-backend-com/src/common/proto"
-	"cos-backend-com/src/common/providers"
-	"cos-backend-com/src/common/util"
 )
 
 func init() {
@@ -60,21 +58,6 @@ func (p *AppConfig) ConfigLoad(env interface{}, confPath string, files ...string
 	helpers.UseGlobalLogger(p.Strip)
 
 	filterOptions := make([]interface{}, 0, 2)
-
-	helpers.X.Recover(func() {
-		val := reflect.Indirect(reflect.ValueOf(env))
-		if elm, ok := util.FindStructElemRecursive(val, reflect.TypeOf(proto.JaegerConfig{})); ok {
-			cfg := elm.Interface().(proto.JaegerConfig)
-
-			p.Provide(providers.JaegerTracing(p.Name, cfg))
-			filterOptions = append(filterOptions, helpers.HookFunc(func(sp *strip.Strip, flag helpers.HookFlag) {
-				if flag != helpers.HookFlagBeforeAll {
-					return
-				}
-				sp.Filter(filters.OpenTracingFilter())
-			}))
-		}
-	})
 
 	filterOptions = append(filterOptions, util.DefaultLoggerOption(p.Strip))
 

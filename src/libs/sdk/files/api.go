@@ -1,21 +1,15 @@
-package minio
+package files
 
 import (
+	"io"
 	"net/http"
-	"net/url"
 	"sync"
-	"time"
 
 	"github.com/minio/minio-go"
 )
 
-// FileService minio service  upload ,download,delete
 type FileService interface {
-	GetFileUploadUrl(bucketName string, objectName string, expires time.Duration) (u *url.URL, err error)
-	GetFileDownloadUrl(bucketName string, objectName string, expires time.Duration, reqParams url.Values) (u *url.URL, err error)
-	GetFileDownloadUrlWithoutSigned(bucketName string, objectName string) (u *url.URL, err error)
-	RemoveFile(bucketName, objectName string) error
-	CopyFile(srcBucket, srcKey, destBucket, destKey string, allowContentTypes []string) error
+	UploadFromReader(bucketName, objectName string, reader io.Reader, objectSize int64, opts minio.PutObjectOptions) (n int64, err error)
 }
 
 type BaseConfig struct {

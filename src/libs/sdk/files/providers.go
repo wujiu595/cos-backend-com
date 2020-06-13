@@ -1,4 +1,4 @@
-package minio
+package files
 
 import (
 	"net/http"
