@@ -6,9 +6,11 @@ import (
 	"cos-backend-com/src/common/util"
 	"cos-backend-com/src/cores"
 	"cos-backend-com/src/cores/routers/categories"
+	"cos-backend-com/src/cores/routers/files"
 	"cos-backend-com/src/cores/routers/startups"
 	"cos-backend-com/src/libs/auth"
 	"cos-backend-com/src/libs/filters"
+	filesSdk "cos-backend-com/src/libs/sdk/files"
 	"net/http"
 	"os"
 
@@ -73,6 +75,12 @@ func (p *appConfig) ConfigProviders() {
 	}
 	oauth2TokenURL := p.Env.Service.Account + "/oauth2/token"
 	p.Provide(auth.AuthTransportProvider(oauth2TokenURL))
+	p.Provide(filesSdk.NewFileService(filesSdk.BaseConfig{
+		cores.Env.Minio.Endpoint,
+		cores.Env.Minio.Secure,
+		cores.Env.Minio.AccessKey,
+		cores.Env.Minio.SecretKey,
+	}))
 }
 
 func (p *appConfig) ConfigFilters() {
@@ -89,7 +97,7 @@ func (p *appConfig) ConfigRoutes() {
 		),
 
 		s.Router("/startups",
-			s.Filter(filters.LoginRequiredInner),
+			//s.Filter(filters.LoginRequiredInner),
 			s.Post(startups.StartUpsHandler{}).Action("Create"),
 			s.Router("/me",
 				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
@@ -112,6 +120,11 @@ func (p *appConfig) ConfigRoutes() {
 			s.Router("/:id",
 				s.Get(categories.CategoriesHandler{}).Action("Get"),
 			),
+		),
+
+		s.Router("/files",
+			s.Filter(filters.LoginRequiredInner),
+			s.Post(files.FilesHandler{}).Action("SignUploadFile"),
 		),
 	)
 }
