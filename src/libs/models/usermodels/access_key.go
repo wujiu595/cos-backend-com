@@ -1,4 +1,4 @@
-package users
+package usermodels
 
 import (
 	"context"

@@ -4,7 +4,7 @@ import (
 	"cos-backend-com/src/account/routers"
 	"cos-backend-com/src/common/flake"
 	"cos-backend-com/src/libs/apierror"
-	"cos-backend-com/src/libs/models/users"
+	"cos-backend-com/src/libs/models/usermodels"
 	"cos-backend-com/src/libs/sdk/account"
 
 	"github.com/wujiu2020/strip/utils/apires"
@@ -24,7 +24,7 @@ func (h *Users) Me() (res interface{}) {
 	}
 
 	var user account.UserResult
-	if err := users.Users.Get(h.Ctx, h.Uid, &user); err != nil {
+	if err := usermodels.Users.Get(h.Ctx, h.Uid, &user); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return

@@ -4,7 +4,7 @@ import (
 	"cos-backend-com/src/common/flake"
 	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/auth"
-	"cos-backend-com/src/libs/models/users"
+	"cos-backend-com/src/libs/models/usermodels"
 	"cos-backend-com/src/libs/sdk/account"
 	"net/http"
 
@@ -47,7 +47,7 @@ func CheckLogin(ctx strip.Context, req *http.Request, log strip.Logger, authTr a
 		return
 	}
 
-	token, err := users.AccessTokens.VerifyToken(ctx, tok.AccessToken, account.TokenTypeAccessToken)
+	token, err := usermodels.AccessTokens.VerifyToken(ctx, tok.AccessToken, account.TokenTypeAccessToken)
 	if err != nil {
 		log.Info("models.AccessTokens.VerifyToken:", err)
 		if apires.IsResError(err) {

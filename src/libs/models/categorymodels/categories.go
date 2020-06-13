@@ -1,4 +1,4 @@
-package categories
+package categorymodels
 
 import (
 	"context"

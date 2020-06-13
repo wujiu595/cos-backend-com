@@ -126,6 +126,67 @@ CREATE SEQUENCE comunion.global_id_sequence
 
 
 --
+-- Name: startup_revisions; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.startup_revisions (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    startup_id bigint NOT NULL,
+    name text NOT NULL,
+    mission text,
+    logo text NOT NULL,
+    description_addr text NOT NULL,
+    category_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: startup_setting_revisions; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.startup_setting_revisions (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    startup_setting_id bigint NOT NULL,
+    token_name text NOT NULL,
+    token_symbol bigint NOT NULL,
+    token_addr text,
+    wallet_addrs jsonb DEFAULT '[]'::jsonb NOT NULL,
+    type text NOT NULL,
+    vote_token_limit bigint,
+    vote_assign_addrs text[] DEFAULT '{}'::text[] NOT NULL,
+    vote_support_percent integer NOT NULL,
+    vote_min_approval_percent integer NOT NULL,
+    vote_min_duration_hours bigint NOT NULL,
+    vote_max_duration_hours bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: COLUMN startup_setting_revisions.type; Type: COMMENT; Schema: comunion; Owner: -
+--
+
+COMMENT ON COLUMN comunion.startup_setting_revisions.type IS 'FounderAssign 指定人投票 持有一定数量token的人才可以投票;POS;ALL 所有人投票';
+
+
+--
+-- Name: startup_settings; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.startup_settings (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    startup_id bigint NOT NULL,
+    current_revision_id bigint,
+    confirming_revision_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: startups; Type: TABLE; Schema: comunion; Owner: -
 --
 
@@ -133,24 +194,35 @@ CREATE TABLE comunion.startups (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
     name text NOT NULL,
     uid bigint NOT NULL,
-    mission text,
-    logo text NOT NULL,
-    tx_id text NOT NULL,
-    block_num bigint,
-    description_addr text NOT NULL,
-    category_id bigint NOT NULL,
+    current_revision_id bigint,
+    confirming_revision_id bigint,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    state integer DEFAULT 0 NOT NULL,
-    is_iro boolean DEFAULT false NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
 --
--- Name: COLUMN startups.state; Type: COMMENT; Schema: comunion; Owner: -
+-- Name: transactions; Type: TABLE; Schema: comunion; Owner: -
 --
 
-COMMENT ON COLUMN comunion.startups.state IS '0 创建中,1 已创建,2 未确认到tx产生,3 上链失败，4 已设置';
+CREATE TABLE comunion.transactions (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    tx_id text NOT NULL,
+    block_addr text,
+    source text NOT NULL,
+    source_id bigint NOT NULL,
+    retry_time integer DEFAULT 0 NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    state integer DEFAULT 1 NOT NULL
+);
+
+
+--
+-- Name: COLUMN transactions.state; Type: COMMENT; Schema: comunion; Owner: -
+--
+
+COMMENT ON COLUMN comunion.transactions.state IS '1 等待确认，2 已确认，3 未确认到';
 
 
 --
@@ -178,11 +250,43 @@ ALTER TABLE ONLY comunion.categories
 
 
 --
+-- Name: startup_revisions startup_revisions_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.startup_revisions
+    ADD CONSTRAINT startup_revisions_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: startup_setting_revisions startup_setting_revisions_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.startup_setting_revisions
+    ADD CONSTRAINT startup_setting_revisions_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: startup_settings startup_settings_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.startup_settings
+    ADD CONSTRAINT startup_settings_id_pk PRIMARY KEY (id);
+
+
+--
 -- Name: startups startups_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
 --
 
 ALTER TABLE ONLY comunion.startups
     ADD CONSTRAINT startups_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: transactions transactions_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.transactions
+    ADD CONSTRAINT transactions_id_pk PRIMARY KEY (id);
 
 
 --
@@ -229,14 +333,42 @@ CREATE UNIQUE INDEX categories_name ON comunion.categories USING btree (name);
 
 
 --
--- Name: start_ups_tx_id; Type: INDEX; Schema: comunion; Owner: -
+-- Name: startup_revisions_startup_id_idx; Type: INDEX; Schema: comunion; Owner: -
 --
 
-CREATE UNIQUE INDEX start_ups_tx_id ON comunion.startups USING btree (tx_id);
+CREATE INDEX startup_revisions_startup_id_idx ON comunion.startup_revisions USING btree (startup_id);
 
 
 --
--- Name: users_wallet_addr; Type: INDEX; Schema: comunion; Owner: -
+-- Name: startup_setting_revisions_startup_setting_id_idx; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE INDEX startup_setting_revisions_startup_setting_id_idx ON comunion.startup_setting_revisions USING btree (startup_setting_id);
+
+
+--
+-- Name: startup_settings_startup_id; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX startup_settings_startup_id ON comunion.startup_settings USING btree (startup_id);
+
+
+--
+-- Name: startups_name_idx; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX startups_name_idx ON comunion.startups USING btree (name);
+
+
+--
+-- Name: transactions_tx_id; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX transactions_tx_id ON comunion.transactions USING btree (tx_id) WHERE (state <> 3);
+
+
+--
+-- Name: users_public_key; Type: INDEX; Schema: comunion; Owner: -
 --
 
 CREATE UNIQUE INDEX users_public_key ON comunion.users USING btree (public_key);

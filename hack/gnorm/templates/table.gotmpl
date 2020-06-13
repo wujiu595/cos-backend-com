@@ -77,14 +77,12 @@ package models
 import (
 	"context"
 	"database/sql"
-
 	"github.com/jmoiron/sqlx"
-
-	"pkg.jimu.io/common/apierror"
-	"pkg.jimu.io/common/dbconn"
-	"pkg.jimu.io/common/dbquery"
-	"pkg.jimu.io/common/flake"
-	"pkg.jimu.io/common/util"
+	"cos-backend-com/src/libs/apierror"
+	"cos-backend-com/src/common/dbconn"
+	"cos-backend-com/src/common/dbquery
+	"cos-backend-com/src/common/flake"
+	"cos-backend-com/src/common/util"
 )
 
 
@@ -100,11 +98,10 @@ type {{camel .Table.DBName}} struct{
 
 // List {{pascal .Table.DBName}} interface{} by input
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})List(ctx context.Context, enterpriseId flake.ID, input *{{ $table }}.List{{pascal .Table.DBName}}Input, outputs interface{})(total int, err error){
+func(c *{{camel .Table.DBName}})List(ctx context.Context, input *{{ $table }}.List{{pascal .Table.DBName}}Input, outputs interface{})(total int, err error){
 	plan := &dbquery.Plan{}
 	plan.RetTotal = true
 
-	plan.AddCond(`AND t.enterprise_id = ${enterpriseId}`)
 	if !input.ShowDeleted {
 		plan.AddCond(`AND t.deleted = false`)
 	}
@@ -114,7 +111,6 @@ func(c *{{camel .Table.DBName}})List(ctx context.Context, enterpriseId flake.ID,
 	plan.LimitSql = ` LIMIT ${limit} OFFSET ${offset}`
 
 	plan.Params = map[string]interface{}{
-		"{enterpriseId}":  enterpriseId,
 		"{offset}":        input.Offset,
 		"{limit}":         input.GetLimit(),
 	}
@@ -126,14 +122,12 @@ func(c *{{camel .Table.DBName}})List(ctx context.Context, enterpriseId flake.ID,
 
 // Get {{pascal .Table.DBName}}Model by id
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})Get(ctx context.Context,enterpriseId, id flake.ID, output interface{})(err error){
+func(c *{{camel .Table.DBName}})Get(ctx context.Context, id flake.ID, output interface{})(err error){
 	plan := &dbquery.Plan{}
 	plan.AddCond(`AND t.id = ${id}`)
-	plan.AddCond(`AND t.enterprise_id = ${enterpriseId}`)
 
 	plan.Params = map[string]interface{}{
 		"{id}":           id,
-		"{enterpriseId}": enterpriseId,
 	}
 	var v struct{ Id flake.ID }
 	_, err = c.Query(ctx, &util.PgJsonScanWrapValues{&[]interface{}{&v}, &[]interface{}{output}}, plan)
@@ -149,7 +143,7 @@ func(c *{{camel .Table.DBName}})Get(ctx context.Context,enterpriseId, id flake.I
 
 // Create {{pascal .Table.DBName}}Model by id
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})Create(ctx context.Context, enterpriseId flake.ID, input *{{ $table }}.{{pascal .Table.DBName}}Input, output interface{})error{
+func(c *{{camel .Table.DBName}})Create(ctx context.Context, input *{{ $table }}.{{pascal .Table.DBName}}Input, output interface{})error{
 	stmt := `
 	INSERT INTO {{ $table }} (
 		{{ join $inputColumns.DBNames ", " }}
@@ -158,7 +152,6 @@ func(c *{{camel .Table.DBName}})Create(ctx context.Context, enterpriseId flake.I
 	) RETURNING id`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{enterpriseId}": enterpriseId,
         {{- range $inputColumns}}
         "{{ printf "{%s}" (camel .DBName | specialId) }}": {{ printf "input.%s" .Name  }} ,
         {{- end }}
@@ -171,26 +164,25 @@ func(c *{{camel .Table.DBName}})Create(ctx context.Context, enterpriseId flake.I
 		}
 
 		newCtx := dbconn.WithDB(ctx, db)
-		er = c.Get(newCtx, enterpriseId, id, output)
+		er = c.Get(newCtx, id, output)
 		return
 	})
 }
 
 // Update {{pascal .Table.DBName}}Model by id
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})Update(ctx context.Context, enterpriseId, id flake.ID, input *{{ $table }}.{{pascal .Table.DBName}}Input, output interface{})error{
+func(c *{{camel .Table.DBName}})Update(ctx context.Context, id flake.ID, input *{{ $table }}.{{pascal .Table.DBName}}Input, output interface{})error{
 	stmt := `
 	UPDATE {{ $table }} SET (
 		{{ join $inputColumns.DBNames ", " }}, updated_at
 	) = (
 		{{ $inputColumnsParams }}, CURRENT_TIMESTAMP
 	) WHERE 
-		enterprise_id = ${enterpriseId} AND {{join .Table.PrimaryKeys.DBNames ", "}} = {{ $PKFieldsParams }}
+		{{join .Table.PrimaryKeys.DBNames ", "}} = {{ $PKFieldsParams }}
 	RETURNING id`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{id}": id,
-		"{enterpriseId}": enterpriseId,
         {{- range $inputColumns}}
         "{{ printf "{%s}" (camel .DBName | specialId) }}": {{ printf "input.%s" .Name  }} ,
         {{- end }}
@@ -210,12 +202,11 @@ func(c *{{camel .Table.DBName}})Update(ctx context.Context, enterpriseId, id fla
 
 // Delete {{pascal .Table.DBName}}Model by id
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})Delete(ctx context.Context, enterpriseId, id flake.ID, output interface{})error{
-	stmt := "UPDATE {{ $table }} SET deleted = true, updated_at = CURRENT_TIMESTAMP WHERE enterprise_id = ${enterpriseId} AND id = ${id} RETURNING id"
+func(c *{{camel .Table.DBName}})Delete(ctx context.Context, id flake.ID, output interface{})error{
+	stmt := "UPDATE {{ $table }} SET deleted = true, updated_at = CURRENT_TIMESTAMP WHERE id = ${id} RETURNING id"
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
         "{id}": id,
-		"{enterpriseId}": enterpriseId,
 	})
 	return c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
 		var id flake.ID
@@ -224,19 +215,18 @@ func(c *{{camel .Table.DBName}})Delete(ctx context.Context, enterpriseId, id fla
 		}
 
 		newCtx := dbconn.WithDB(ctx, db)
-		er = c.Get(newCtx, enterpriseId, id, output)
+		er = c.Get(newCtx, id, output)
         return
 	})
 }
 
 // Restore {{pascal .Table.DBName}}Model by id
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})Restore(ctx context.Context, enterpriseId, id flake.ID, output interface{})error{
-	stmt := "UPDATE {{ $table }} SET deleted = false, updated_at = CURRENT_TIMESTAMP WHERE enterprise_id = ${enterpriseId} AND id = ${id} RETURNING id"
+func(c *{{camel .Table.DBName}})Restore(ctx context.Context, id flake.ID, output interface{})error{
+	stmt := "UPDATE {{ $table }} SET deleted = false, updated_at = CURRENT_TIMESTAMP WHERE id = ${id} RETURNING id"
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
         "{id}": id,
-		"{enterpriseId}": enterpriseId,
 	})
 	return c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
 		var id flake.ID
@@ -252,12 +242,11 @@ func(c *{{camel .Table.DBName}})Restore(ctx context.Context, enterpriseId, id fl
 
 // Delete {{pascal .Table.DBName}}Model by id
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})Delete(ctx context.Context, enterpriseId, id flake.ID)error{
-	stmt := "DELETE FROM {{ $table }} WHERE enterprise_id = ${enterpriseId} AND id = ${id}"
+func(c *{{camel .Table.DBName}})Delete(ctx context.Context, id flake.ID)error{
+	stmt := "DELETE FROM {{ $table }} WHERE id = ${id}"
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
         "{id}": id,
-		"{enterpriseId}": enterpriseId,
 	})
 	return c.Invoke(ctx, func(db dbconn.Q) error {
 		_, err := db.ExecContext(ctx, query, args...) // nolint: errcheck
@@ -302,12 +291,11 @@ func(c *{{camel .Table.DBName}})Query(ctx context.Context, m interface{}, plan *
 }
 
 // TODO: 删除本行表示您已确认下方func已完成
-func(c *{{camel .Table.DBName}})Exists(ctx context.Context, enterpriseId, id flake.ID) (exists bool, err error) {
-	stmt := "SELECT EXISTS(SELECT 1 FROM {{ $table }} WHERE enterprise_id = ${enterpriseId} AND id = ${id} AND deleted = false)" // TODO: 删除本TODO表示您已确认deleted字段存在情况
+func(c *{{camel .Table.DBName}})Exists(ctx context.Context, id flake.ID) (exists bool, err error) {
+	stmt := "SELECT EXISTS(SELECT 1 FROM {{ $table }} WHERE id = ${id} AND deleted = false)" // TODO: 删除本TODO表示您已确认deleted字段存在情况
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{id}":           id,
-		"{enterpriseId}": enterpriseId,
 	})
 	err = c.Invoke(ctx, func(db dbconn.Q) error {
 		return db.GetContext(ctx, &exists, query, args...)
@@ -345,6 +333,15 @@ func Filter(ctx teapot.Context, log teapot.ReqLogger, rw http.ResponseWriter, re
 }
 
 
+//	"cos-backend-com/src/common/flake"
+  	"cos-backend-com/src/common/validate"
+  	"cos-backend-com/src/cores/routers"
+  	"cos-backend-com/src/libs/apierror"
+  	"cos-backend-com/src/libs/models/startups"
+  	"cos-backend-com/src/libs/sdk/cores"
+  	"net/http"
+
+  	"github.com/wujiu2020/strip/utils/apires"
 // ------------------------------
 // Handler
 // ------------------------------
@@ -353,20 +350,14 @@ package {{ $table }}
 import (
 	"net/http"
 
-	"github.com/teapots/utils/apires"
-	"pkg.jimu.io/common/pagination"
-
-	"pkg.jimu.io/libs/sdk/auth/access"
-	"pkg.jimu.io/common/apierror"
-	"pkg.jimu.io/common/flake"
-	"pkg.jimu.io/common/validate"
+	"cos-backend-com/src/libs/apierror"
+	"cos-backend-com/src/common/flake"
+	"cos-backend-com/src/common/validate"
 )
 
 // {{pascal .Table.DBName}}Handler represents handler for '{{ $table }}'.
 type {{pascal .Table.DBName}}Handler struct{
 	routers.Base
-
-	AcRes *access.AccessCheckResult `inject`
 }
 
 // TODO: 删除本行表示您已确认下方func已完成
@@ -381,7 +372,7 @@ func(h *{{pascal .Table.DBName}}Handler)List()(res interface{}){
 	}
 
 	var output {{ $table }}.List{{pascal .Table.DBName}}Result
-	total, err := models.{{pascal .Table.DBName}}.List(h.Ctx, h.AcRes.TokenInfo.EnterpriseId, &params, &output.Result)
+	total, err := models.{{pascal .Table.DBName}}.List(h.Ctx, &params, &output.Result)
 	if err != nil{
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
@@ -409,7 +400,7 @@ func(h *{{pascal .Table.DBName}}Handler)Create()(res interface{}){
 	}
 
 	var output {{ $table }}.{{pascal .Table.DBName}}Result
-	if err := models.{{pascal .Table.DBName}}.Create(h.Ctx, h.AcRes.TokenInfo.EnterpriseId, &input, &output); err != nil {
+	if err := models.{{pascal .Table.DBName}}.Create(h.Ctx, &input, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
@@ -422,7 +413,7 @@ func(h *{{pascal .Table.DBName}}Handler)Create()(res interface{}){
 // TODO: 删除本行表示您已确认下方func已完成
 func(h *{{pascal .Table.DBName}}Handler)Get(id flake.ID)(res interface{}){
 	var output {{ $table }}.{{pascal .Table.DBName}}Result
-	if err := models.{{pascal .Table.DBName}}.Get(h.Ctx, h.AcRes.TokenInfo.EnterpriseId,  id, &output); err != nil {
+	if err := models.{{pascal .Table.DBName}}.Get(h.Ctx,  id, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
@@ -448,7 +439,7 @@ func(h *{{pascal .Table.DBName}}Handler)Update(id flake.ID)(res interface{}){
 	}
 
 	var output {{ $table }}.{{pascal .Table.DBName}}Result
-	if err := models.{{pascal .Table.DBName}}.Update(h.Ctx, h.AcRes.TokenInfo.EnterpriseId, id, &input, &output); err != nil {
+	if err := models.{{pascal .Table.DBName}}.Update(h.Ctx, id, &input, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
@@ -461,7 +452,7 @@ func(h *{{pascal .Table.DBName}}Handler)Update(id flake.ID)(res interface{}){
 // TODO: 删除本行表示您已确认下方func已完成
 func(h *{{pascal .Table.DBName}}Handler)Delete(id flake.ID)(res interface{}){
 	var output {{ $table }}.{{pascal .Table.DBName}}Result
-	if err := models.{{pascal .Table.DBName}}.Delete(h.Ctx, h.AcRes.TokenInfo.EnterpriseId, id, &output); err != nil {
+	if err := models.{{pascal .Table.DBName}}.Delete(h.Ctx, id, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
@@ -474,7 +465,7 @@ func(h *{{pascal .Table.DBName}}Handler)Delete(id flake.ID)(res interface{}){
 // TODO: 删除本行表示您已确认下方func已完成
 func(h *{{pascal .Table.DBName}}Handler)Restore(id flake.ID)(res interface{}){
 	var output {{ $table }}.{{pascal .Table.DBName}}Result
-	if err := models.{{pascal .Table.DBName}}.Restore(h.Ctx, h.AcRes.TokenInfo.EnterpriseId, id, &output); err != nil {
+	if err := models.{{pascal .Table.DBName}}.Restore(h.Ctx, id, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
@@ -486,7 +477,7 @@ func(h *{{pascal .Table.DBName}}Handler)Restore(id flake.ID)(res interface{}){
 
 // TODO: 删除本行表示您已确认下方func已完成
 func(h *{{pascal .Table.DBName}}Handler)Delete(id flake.ID)(res interface{}){
-	if err := models.{{pascal .Table.DBName}}.Delete(h.Ctx, h.AcRes.TokenInfo.EnterpriseId, id); err != nil {
+	if err := models.{{pascal .Table.DBName}}.Delete(h.Ctx, id); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
