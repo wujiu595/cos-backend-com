@@ -49,7 +49,7 @@ func (h *StartUpsHandler) ListMe() (res interface{}) {
 		return
 	}
 	var uid flake.ID
-	//h.Ctx.Find(&uid, "uid")
+	h.Ctx.Find(&uid, "uid")
 	var output cores.ListStartupsResult
 	total, err := startupmodels.Startups.ListMe(h.Ctx, uid, &params, &output.Result)
 	if err != nil {
@@ -78,7 +78,7 @@ func (h *StartUpsHandler) Create() (res interface{}) {
 	}
 
 	var uid flake.ID
-	//h.Ctx.Find(&uid, "uid")
+	h.Ctx.Find(&uid, "uid")
 	var startupIdResult cores.StartupIdResult
 	if err := startupmodels.Startups.CreateWithRevision(h.Ctx, uid, &input, &startupIdResult.Id); err != nil {
 		h.Log.Warn(err)
