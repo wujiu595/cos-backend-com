@@ -97,7 +97,7 @@ func (p *appConfig) ConfigRoutes() {
 		),
 
 		s.Router("/startups",
-			//s.Filter(filters.LoginRequiredInner),
+			s.Filter(filters.LoginRequiredInner),
 			s.Post(startups.StartUpsHandler{}).Action("Create"),
 			s.Router("/me",
 				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
