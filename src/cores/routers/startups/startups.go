@@ -7,6 +7,7 @@ import (
 	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models/startupmodels"
 	"cos-backend-com/src/libs/sdk/cores"
+	"fmt"
 	"net/http"
 
 	"github.com/wujiu2020/strip/utils/apires"
@@ -49,7 +50,7 @@ func (h *StartUpsHandler) ListMe() (res interface{}) {
 		return
 	}
 	var uid flake.ID
-	//h.Ctx.Find(&uid, "uid")
+	h.Ctx.Find(&uid, "uid")
 	var output cores.ListStartupsResult
 	total, err := startupmodels.Startups.ListMe(h.Ctx, uid, &params, &output.Result)
 	if err != nil {
@@ -78,7 +79,7 @@ func (h *StartUpsHandler) Create() (res interface{}) {
 	}
 
 	var uid flake.ID
-	//h.Ctx.Find(&uid, "uid")
+	h.Ctx.Find(&uid, "uid")
 	var startupIdResult cores.StartupIdResult
 	if err := startupmodels.Startups.CreateWithRevision(h.Ctx, uid, &input, &startupIdResult.Id); err != nil {
 		h.Log.Warn(err)
@@ -120,6 +121,7 @@ func (h *StartUpsHandler) Update(id flake.ID) (res interface{}) {
 
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
+	fmt.Println(uid)
 	var startupIdResult cores.StartupIdResult
 	if err := startupmodels.Startups.UpdateWithRevision(h.Ctx, uid, id, &input, &startupIdResult.Id); err != nil {
 		h.Log.Warn(err)
