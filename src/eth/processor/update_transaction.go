@@ -6,7 +6,7 @@ import (
 	"cos-backend-com/src/libs/models/ethmodels"
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
 
-	"github.com/ethereum/go-ethereum/log"
+	"qiniupkg.com/x/log.v7"
 )
 
 type Updater struct {
@@ -21,18 +21,15 @@ func (c *Updater) Process() {
 				State:     transactionInput.State,
 			}
 			if err := ethmodels.Transactions.UpdateWithConfirmSource(context.Background(), transactionInput.Id, transactionInput.SourceId, transactionInput.Source, &updateTransactionsInput); err != nil {
-				log.Warn(err.Error())
+				log.Warn(err)
 			}
 		} else {
-			if transactionInput.RetryTime < 5 {
-				continue
-			}
 			updateTransactionsInput := ethSdk.UpdateTransactionsInput{
 				BlockAddr: transactionInput.BlockAddr,
 				State:     transactionInput.State,
 			}
 			if err := ethmodels.Transactions.Update(context.Background(), transactionInput.Id, &updateTransactionsInput); err != nil {
-				log.Warn(err.Error())
+				log.Warn(err)
 			}
 		}
 	}

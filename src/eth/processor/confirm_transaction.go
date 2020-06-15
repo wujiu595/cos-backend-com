@@ -6,7 +6,7 @@ import (
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"qiniupkg.com/x/log.v7"
 )
 
 type Confirmer struct {
@@ -19,8 +19,12 @@ func (c *Confirmer) Process() {
 		txHash := common.HexToHash(transactionInput.TxId)
 		receipt, err := EthClient.TransactionReceipt(context.Background(), txHash)
 		if err != nil {
-			transactionInput.State = ethSdk.TransactionStateFailed
-			log.Warn(err.Error())
+			if transactionInput.RetryTime < 5 {
+				transactionInput.State = ethSdk.TransactionStateWaitConfirm
+			} else {
+				transactionInput.State = ethSdk.TransactionStateFailed
+			}
+			log.Warn(err, txHash)
 		} else {
 			transactionInput.BlockAddr = receipt.BlockHash.Hex()
 			transactionInput.State = ethSdk.TransactionStateSuccess

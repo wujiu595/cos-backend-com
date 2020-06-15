@@ -24,7 +24,7 @@ func (c *transactions) List(ctx context.Context, outputs interface{}) (err error
 		WITH res AS(
 			SELECT *
 			FROM transactions
-			WHERE state = 1 AND retry_time < 5
+			WHERE state = 1
 		)
 		SELECT COALESCE(json_agg(r.*), '[]'::json) FROM res r;
 	`
