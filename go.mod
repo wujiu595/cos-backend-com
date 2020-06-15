@@ -25,6 +25,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.5.1
+	github.com/trustmaster/goflow v0.0.0-20200418181934-7d201b964009
 	github.com/uber/jaeger-client-go v2.23.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
 	github.com/wujiu2020/sqlhooks v0.0.0-20200514182239-c1d2a8cea375

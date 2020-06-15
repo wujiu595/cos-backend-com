@@ -106,7 +106,7 @@ func (c *startupSettings) CreateRevision(ctx context.Context, startupSettingId f
 			SourceId: *revisionId,
 		}
 
-		return ethmodels.Transactions.Insert(newCtx, &createTransactionsInput)
+		return ethmodels.Transactions.Create(newCtx, &createTransactionsInput)
 	})
 }
 

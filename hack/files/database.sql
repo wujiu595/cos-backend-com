@@ -29,7 +29,7 @@ CREATE SCHEMA comunion;
 CREATE FUNCTION comunion.fake_id(id text) RETURNS bigint
     LANGUAGE sql IMMUTABLE
     AS $_$
-SELECT hex_to_int(concat(left(md5(substring(id from '(.*?)(?:-\d+)?$')), 10), coalesce(
+SELECT comunion.hex_to_int(concat(left(md5(substring(id from '(.*?)(?:-\d+)?$')), 10), coalesce(
     lpad(to_hex(substring(id from '.*-(\d+)$')::BIGINT), 4, '0')
 )))
 $_$;
@@ -53,6 +53,22 @@ BEGIN
         RETURN NEXT r;
     END LOOP;
     RETURN;
+END;
+$$;
+
+
+--
+-- Name: hex_to_int(text); Type: FUNCTION; Schema: comunion; Owner: -
+--
+
+CREATE FUNCTION comunion.hex_to_int(id text) RETURNS bigint
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+DECLARE
+  result BIGINT;
+BEGIN
+  EXECUTE 'SELECT x''' || id || '''::bigint' INTO result;
+  RETURN result;
 END;
 $$;
 

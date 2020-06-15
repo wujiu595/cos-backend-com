@@ -43,11 +43,11 @@ type CreateTransactionsInput struct {
 }
 
 type UpdateTransactionsInput struct {
-	BlockAddr string `json:"blockAddr"`
-	State     int    `json:"state"`
+	BlockAddr string           `json:"blockAddr"`
+	State     TransactionState `json:"state"`
 }
 
 type TransactionsResult struct {
-	TxId      string `json:"txId"`
-	BlockAddr string `json:"blockAddr"`
+	TxId      string `json:"txId" db:"tx_id"`           // tx_id
+	BlockAddr string `json:"blockAddr" db:"block_addr"` // block_addr
 }

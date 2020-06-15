@@ -37,20 +37,19 @@ func (h *StartUpSettingsHandler) Update(startupId flake.ID) (res interface{}) {
 		return
 	}
 
-	res = apires.With(&startupSettingResult, http.StatusCreated)
+	res = apires.With(&startupSettingResult, http.StatusOK)
 	return
 }
 
 func (h *StartUpSettingsHandler) Restore(id flake.ID) (res interface{}) {
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
-	var startupIdResult cores.StartupIdResult
 	if err := startupmodels.StartupSettings.Restore(h.Ctx, uid, id); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
 	}
 
-	res = apires.With(&startupIdResult, http.StatusCreated)
+	res = apires.With(http.StatusOK)
 	return
 }

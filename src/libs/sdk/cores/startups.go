@@ -8,14 +8,6 @@ import (
 
 type StartUpState int
 
-const (
-	StartUpStateCreating      StartUpState = 0
-	StartUpStateCreated       StartUpState = 1
-	StartUpStateConfirmFailed StartUpState = 2
-	StartUpStateFailed        StartUpState = 3
-	StartUpStateHasSetting    StartUpState = 4
-)
-
 type CreateStartupInput struct {
 	CreateStartupRevisionInput
 }
@@ -37,15 +29,14 @@ type StartupIdResult struct {
 }
 
 type StartUpResult struct {
-	Id              flake.ID             `json:"id" db:"id"`
-	Name            string               `json:"name" db:"name"`
-	Mission         *string              `json:"mission" db:"mission"`
-	Logo            string               `json:"logo" db:"logo"`
-	DescriptionAddr string               `json:"descriptionAddr" db:"description_addr"`
-	Category        CategoriesResult     `json:"category" db:"category"`
-	State           eth.TransactionState `json:"state" db:"state"`
-	SettingState    eth.TransactionState `json:"settingState" db:"setting_state"`
-	IsIRO           bool                 `json:"isIRO" db:"is_iro"`
+	Id              flake.ID                      `json:"id" db:"id"`
+	Name            string                        `json:"name" db:"name"`
+	Mission         *string                       `json:"mission" db:"mission"`
+	Logo            string                        `json:"logo" db:"logo"`
+	DescriptionAddr string                        `json:"descriptionAddr" db:"description_addr"`
+	Category        CategoriesResult              `json:"category" db:"category"`
+	Setting         StartupSettingRevisionsResult `json:"settings" db:"settings"`
+	Transaction     eth.TransactionsResult        `json:"transaction" db:"transaction"`
 }
 
 type ListStartupsInput struct {
@@ -55,7 +46,29 @@ type ListStartupsInput struct {
 	pagination.ListRequest
 }
 
+type ListMeStartupsResult struct {
+	pagination.ListResult
+	Result []struct {
+		Id              flake.ID             `json:"id" db:"id"`
+		Name            string               `json:"name" db:"name"`
+		Mission         *string              `json:"mission" db:"mission"`
+		Logo            string               `json:"logo" db:"logo"`
+		DescriptionAddr string               `json:"descriptionAddr" db:"description_addr"`
+		Category        CategoriesResult     `json:"category" db:"category"`
+		State           eth.TransactionState `json:"state" db:"state"`
+		SettingState    eth.TransactionState `json:"settingState" db:"setting_state"`
+	} `json:"result"`
+}
+
 type ListStartupsResult struct {
 	pagination.ListResult
-	Result []StartUpResult `json:"result"`
+	Result []struct {
+		Id              flake.ID         `json:"id" db:"id"`
+		Name            string           `json:"name" db:"name"`
+		Mission         *string          `json:"mission" db:"mission"`
+		Logo            string           `json:"logo" db:"logo"`
+		DescriptionAddr string           `json:"descriptionAddr" db:"description_addr"`
+		Category        CategoriesResult `json:"category" db:"category"`
+		IsIRO           bool             `json:"isIRO" db:"is_iro"`
+	} `json:"result"`
 }

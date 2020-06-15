@@ -52,7 +52,6 @@ func (p *appConfig) ConfigDB() *sqlx.DB {
 }
 
 func (p *appConfig) ConfigProviders() {
-
 	redisPool, err := pool.NewCustom("tcp",
 		p.Env.Redis.Addr,
 		p.Env.Redis.PoolSize,
@@ -102,16 +101,21 @@ func (p *appConfig) ConfigRoutes() {
 			s.Router("/me",
 				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
 			),
+
 			s.Router("/:id",
-				s.Router(":restore",
-					s.Post(startups.StartUpsHandler{}).Action("Restore"),
-				),
+				s.Put(startups.StartUpsHandler{}).Action("Update"),
+				s.Get(startups.StartUpsHandler{}).Action("Get"),
 				s.Router("/settings",
 					s.Put(startups.StartUpSettingsHandler{}).Action("Update"),
-					s.Router(":restore",
-						s.Put(startups.StartUpSettingsHandler{}).Action("Restore"),
-					),
 				),
+			),
+			//restore startup
+			s.Router("/:id:restore",
+				s.Post(startups.StartUpsHandler{}).Action("Restore"),
+			),
+			//restore startup settings
+			s.Router("/:id/settings:restore",
+				s.Post(startups.StartUpSettingsHandler{}).Action("Restore"),
 			),
 		),
 
