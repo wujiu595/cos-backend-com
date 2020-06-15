@@ -20,4 +20,9 @@ type Config struct {
 
 	// 内部服务
 	Service proto.ServiceEndpoint `conf:"service"`
+
+	EthClient struct {
+		EndPoint  string `conf:"end_point"`
+		InfuraKey string `conf:"infura_key"`
+	} `conf:"eth"`
 }

@@ -149,29 +149,38 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 
 func (c *startups) Get(ctx context.Context, uid, id flake.ID, output interface{}) (err error) {
 	stmt := `
-		SELECT
-		    s.id,
-		    sr.name,
-		    sr.logo,
-		    sr.mission,
-		    sr.description_addr,
-		    c AS category,
-		    ssr AS settings
-		FROM startups s
-		    INNER JOIN startup_revisions sr ON s.current_revision_id = sr.id
-		    INNER JOIN categories c ON c.id = sr.category_id
-		    INNER JOIN startup_settings ss ON s.id = ss.startup_id
-		    INNER JOIN startup_setting_revisions ssr ON ss.current_revision_id = ssr.id
-		WHERE s.uid = ${uid}
-		    AND s.id = ${id};
+	WITH res AS (
+	    SELECT 
+			s.id,
+			sr.name,
+			sr.logo,
+			sr.mission,
+			sr.description_addr,
+			c   AS category,
+			ssr AS settings,
+			t1  AS transaction
+	    FROM startups s
+			INNER JOIN startup_revisions sr ON s.current_revision_id = sr.id
+			INNER JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup} AND t1.state = ${stateSuccess}
+			INNER JOIN categories c ON c.id = sr.category_id
+			INNER JOIN startup_settings ss ON s.id = ss.startup_id
+			INNER JOIN startup_setting_revisions ssr ON ss.current_revision_id = ssr.id
+			INNER JOIN transactions t2 ON t2.source_id = ssr.id AND t2.source = ${sourceStartupSetting} AND t2.state = ${stateSuccess}
+	    WHERE s.uid = ${uid}
+			AND s.id = ${id}
+	)
+	SELECT row_to_json(res.*) FROM res
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{uid}": uid,
-		"{id}":  id,
+		"{uid}":                  uid,
+		"{id}":                   id,
+		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
+		"{stateSuccess}":         ethSdk.TransactionStateSuccess,
 	})
 
-	return c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
-		return db.GetContext(ctx, &output, query, args...)
+	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
+		return db.GetContext(ctx, &util.PgJsonScanWrap{output}, query, args...)
 	})
 }
 
@@ -248,38 +257,35 @@ func (c *startups) CreateRevision(ctx context.Context, startupId flake.ID, input
 			SourceId: *revisionId,
 		}
 
-		return ethmodels.Transactions.Insert(newCtx, &createTransactionsInput)
+		return ethmodels.Transactions.Create(newCtx, &createTransactionsInput)
 	})
 }
 
-func (c *startups) UpdateWithRevision(ctx context.Context, uid, id flake.ID, input *coresSdk.UpdateStartupInput, startupId *flake.ID) (err error) {
+func (c *startups) UpdateWithRevision(ctx context.Context, uid, id flake.ID, input *coresSdk.UpdateStartupInput) (err error) {
 	stmt := `
 		UPDATE startups SET
 		(
 		    name, confirming_revision_id, updated_at
 		) = (
 		    ${name}, ${confirmingRevisionId}, CURRENT_TIMESTAMP
-		) WHERE id = ${id};
+		) WHERE id = ${id} AND uid = ${uid};
 	`
 	return c.Invoke(ctx, func(db *sqlx.Tx) error {
 		newCtx := dbconn.WithDB(ctx, db)
-		if er := c.Update(newCtx, uid, id, input, startupId); er != nil {
-			return er
-		}
-
 		var startupRevisionId flake.ID
-		if er := c.CreateRevision(newCtx, *startupId, &input.CreateStartupRevisionInput, &startupRevisionId); er != nil {
+		if er := c.CreateRevision(newCtx, id, &input.CreateStartupRevisionInput, &startupRevisionId); er != nil {
 			return er
 		}
 
 		query, args := util.PgMapQuery(stmt, map[string]interface{}{
-			"{id}":                   *startupId,
+			"{id}":                   id,
+			"{uid}":                  uid,
 			"{name}":                 input.Name,
 			"{confirmingRevisionId}": startupRevisionId,
 		})
 
 		return c.Invoke(newCtx, func(db dbconn.Q) (er error) {
-			_, er = db.ExecContext(ctx, query, args...)
+			_, er = db.ExecContext(newCtx, query, args...)
 			return er
 		})
 	})
@@ -309,10 +315,12 @@ func (c *startups) Update(ctx context.Context, uid, id flake.ID, input *coresSdk
 
 func (c *startups) Restore(ctx context.Context, uid, id flake.ID) (err error) {
 	stmt := `
-		UPDATE startups
-		SET (confirming_revision_id,updated_at)= (current_revision_id,current_timestamp)
-		WHERE uid = ${uid}
-		  AND id = ${id};
+		UPDATE startups s
+		SET (name,confirming_revision_id,updated_at)= (sr.name,current_revision_id,current_timestamp)
+		FROM startup_revisions sr
+		WHERE s.uid = ${uid}
+		  AND s.id = ${id}
+          AND sr.id = s.current_revision_id;
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{

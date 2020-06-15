@@ -50,7 +50,7 @@ func (h *StartUpsHandler) ListMe() (res interface{}) {
 	}
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
-	var output cores.ListStartupsResult
+	var output cores.ListMeStartupsResult
 	total, err := startupmodels.Startups.ListMe(h.Ctx, uid, &params, &output.Result)
 	if err != nil {
 		h.Log.Warn(err)
@@ -86,7 +86,7 @@ func (h *StartUpsHandler) Create() (res interface{}) {
 		return
 	}
 
-	res = apires.With(&startupIdResult, http.StatusCreated)
+	res = apires.With(&startupIdResult, http.StatusOK)
 	return
 }
 
@@ -120,27 +120,25 @@ func (h *StartUpsHandler) Update(id flake.ID) (res interface{}) {
 
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
-	var startupIdResult cores.StartupIdResult
-	if err := startupmodels.Startups.UpdateWithRevision(h.Ctx, uid, id, &input, &startupIdResult.Id); err != nil {
+	if err := startupmodels.Startups.UpdateWithRevision(h.Ctx, uid, id, &input); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
 	}
 
-	res = apires.With(&startupIdResult, http.StatusCreated)
+	res = apires.With(http.StatusOK)
 	return
 }
 
 func (h *StartUpsHandler) Restore(id flake.ID) (res interface{}) {
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
-	var startupIdResult cores.StartupIdResult
 	if err := startupmodels.Startups.Restore(h.Ctx, uid, id); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
 	}
 
-	res = apires.With(&startupIdResult, http.StatusCreated)
+	res = apires.With(http.StatusOK)
 	return
 }

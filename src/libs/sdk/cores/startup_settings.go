@@ -2,6 +2,8 @@ package cores
 
 import (
 	"cos-backend-com/src/common/flake"
+
+	"github.com/jmoiron/sqlx/types"
 )
 
 type StartupSettingResult struct {
@@ -24,4 +26,18 @@ type UpdateStartupSettingInput struct {
 	VoteMinApprovalPercent int      `json:"voteMinApprovalPercent"`
 	VoteMinDurationHours   int64    `json:"voteMinDurationHours"`
 	VoteMaxDurationHours   int64    `json:"voteMaxDurationHours"`
+}
+
+type StartupSettingRevisionsResult struct {
+	TokenName              string         `json:"tokenName" db:"token_name"`     // token_name
+	TokenSymbol            string         `json:"tokenSymbol" db:"token_symbol"` // token_symbol
+	TokenAddr              *string        `json:"tokenAddr" db:"token_addr"`     // token_addr
+	WalletAddrs            types.JSONText `json:"walletAddrs" db:"wallet_addrs"`
+	Type                   string         `json:"type" db:"type"`                                        // type
+	VoteTokenLimit         *flake.ID      `json:"voteTokenLimit" db:"vote_token_limit"`                  // vote_token_limit
+	VoteAssignAddrs        []string       `json:"voteAssignAddrs" db:"vote_assign_addrs"`                // vote_assign_addrs
+	VoteSupportPercent     int            `json:"voteSupportPercent" db:"vote_support_percent"`          // vote_support_percent
+	VoteMinApprovalPercent int            `json:"voteMinApprovalPercent" db:"vote_min_approval_percent"` // vote_min_approval_percent
+	VoteMinDurationHours   flake.ID       `json:"voteMinDurationHours" db:"vote_min_duration_hours"`     // vote_min_duration_hours
+	VoteMaxDurationHours   flake.ID       `json:"voteMaxDurationHours" db:"vote_max_duration_hours"`     // vote_max_duration_hours
 }
