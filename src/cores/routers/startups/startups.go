@@ -104,6 +104,20 @@ func (h *StartUpsHandler) Get(id flake.ID) (res interface{}) {
 	return
 }
 
+func (h *StartUpsHandler) GetPrepareId() (res interface{}) {
+	startupId, err := startupmodels.Startups.NextId(h.Ctx)
+	if err != nil {
+		h.Log.Warn(err)
+		res = apierror.ErrBadRequest.WithData(err)
+		return
+	}
+
+	res = apires.With(cores.StartupIdResult{
+		Id: startupId,
+	}, http.StatusOK)
+	return
+}
+
 func (h *StartUpsHandler) Update(id flake.ID) (res interface{}) {
 	var input cores.UpdateStartupInput
 	if err := h.Params.BindJsonBody(&input); err != nil {

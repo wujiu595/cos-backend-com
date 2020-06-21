@@ -218,12 +218,13 @@ func (c *startups) CreateWithRevision(ctx context.Context, uid flake.ID, input *
 
 func (c *startups) Create(ctx context.Context, uid flake.ID, input *coresSdk.CreateStartupInput, output interface{}) (err error) {
 	stmt := `
-		INSERT INTO startups(name, uid)
-		VALUES (${name},${uid}) RETURNING id;
+		INSERT INTO startups(id, name, uid)
+		VALUES (${id}, ${name},${uid}) RETURNING id;
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{uid}":  uid,
+		"{id}":   input.Id,
 		"{name}": input.Name,
 	})
 
@@ -332,6 +333,13 @@ func (c *startups) Restore(ctx context.Context, uid, id flake.ID) (err error) {
 		_, er = db.ExecContext(ctx, query, args...)
 		return er
 	})
+}
+
+func (c *startups) NextId(ctx context.Context) (netxtId flake.ID, err error) {
+	err = c.Invoke(ctx, func(db dbconn.Q) error {
+		return db.GetContext(ctx, &netxtId, `SELECT id_generator()`)
+	})
+	return
 }
 
 func (c *startups) Exists(ctx context.Context, uid, id flake.ID) (exists bool, err error) {
