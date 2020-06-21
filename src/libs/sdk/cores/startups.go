@@ -17,6 +17,7 @@ type UpdateStartupInput struct {
 }
 
 type CreateStartupRevisionInput struct {
+	Id              string   `json:"id"`
 	Name            string   `json:"name"`
 	Mission         *string  `json:"mission"`
 	Logo            string   `json:"logo"`

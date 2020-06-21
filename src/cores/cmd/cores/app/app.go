@@ -101,6 +101,9 @@ func (p *appConfig) ConfigRoutes() {
 			s.Router("/me",
 				s.Get(startups.StartUpsHandler{}).Action("ListMe"),
 			),
+			s.Router("/prepareId",
+				s.Get(startups.StartUpsHandler{}).Action("GetPrepareId"),
+			),
 
 			s.Router("/:id",
 				s.Put(startups.StartUpsHandler{}).Action("Update"),
