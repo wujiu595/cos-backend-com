@@ -91,10 +91,22 @@ func (h *StartUpsHandler) Create() (res interface{}) {
 }
 
 func (h *StartUpsHandler) Get(id flake.ID) (res interface{}) {
+	var output cores.StartUpResult
+	if err := startupmodels.Startups.Get(h.Ctx, id, &output); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&output, http.StatusOK)
+	return
+}
+
+func (h *StartUpsHandler) GetMe(id flake.ID) (res interface{}) {
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
 	var output cores.StartUpResult
-	if err := startupmodels.Startups.Get(h.Ctx, uid, id, &output); err != nil {
+	if err := startupmodels.Startups.GetMe(h.Ctx, uid, id, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
