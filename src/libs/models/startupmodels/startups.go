@@ -147,7 +147,7 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 	})
 }
 
-func (c *startups) Get(ctx context.Context, uid, id flake.ID, output interface{}) (err error) {
+func (c *startups) Get(ctx context.Context, id flake.ID, output interface{}) (err error) {
 	stmt := `
 	WITH res AS (
 	    SELECT 
@@ -166,6 +166,40 @@ func (c *startups) Get(ctx context.Context, uid, id flake.ID, output interface{}
 			INNER JOIN startup_settings ss ON s.id = ss.startup_id
 			INNER JOIN startup_setting_revisions ssr ON ss.current_revision_id = ssr.id
 			INNER JOIN transactions t2 ON t2.source_id = ssr.id AND t2.source = ${sourceStartupSetting} AND t2.state = ${stateSuccess}
+	    WHERE s.id = ${id}
+	)
+	SELECT row_to_json(res.*) FROM res
+	`
+	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+		"{id}":                   id,
+		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
+		"{stateSuccess}":         ethSdk.TransactionStateSuccess,
+	})
+
+	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
+		return db.GetContext(ctx, &util.PgJsonScanWrap{output}, query, args...)
+	})
+}
+
+func (c *startups) GetMe(ctx context.Context, uid, id flake.ID, output interface{}) (err error) {
+	stmt := `
+	WITH res AS (
+	    SELECT 
+			s.id,
+			sr.name,
+			sr.logo,
+			sr.mission,
+			sr.description_addr,
+			c   AS category,
+			ssr AS settings,
+			t1  AS transaction
+	    FROM startups s
+			LEFT JOIN startup_revisions sr ON s.confirming_revision_id = sr.id
+			LEFT JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup}
+			LEFT JOIN categories c ON c.id = sr.category_id
+			LEFT JOIN startup_settings ss ON s.id = ss.startup_id
+			LEFT JOIN startup_setting_revisions ssr ON ss.confirming_revision_id = ssr.id
 	    WHERE s.uid = ${uid}
 			AND s.id = ${id}
 	)
