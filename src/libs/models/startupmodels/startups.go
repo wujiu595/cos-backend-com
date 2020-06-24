@@ -24,7 +24,7 @@ type startups struct {
 func (c *startups) List(ctx context.Context, input *coresSdk.ListStartupsInput, outputs interface{}) (total int, err error) {
 	filterStmt := ``
 	if input.CategoryId != 0 {
-		filterStmt += `AND s.category_id = ${categoryId}`
+		filterStmt += `AND sr.category_id = ${categoryId}`
 	}
 	var keyword string
 	if input.Keyword != "" {
@@ -32,7 +32,7 @@ func (c *startups) List(ctx context.Context, input *coresSdk.ListStartupsInput, 
 		filterStmt += `AND s.name ILIKE ${keyword}`
 	}
 
-	stmt := `
+	stmt := ` 
 		WITH res AS(
 			SELECT
 				s.id,
