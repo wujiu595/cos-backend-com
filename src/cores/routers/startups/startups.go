@@ -7,6 +7,7 @@ import (
 	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models/startupmodels"
 	"cos-backend-com/src/libs/sdk/cores"
+	"fmt"
 	"net/http"
 
 	"github.com/wujiu2020/strip/utils/apires"
@@ -157,6 +158,7 @@ func (h *StartUpsHandler) Update(id flake.ID) (res interface{}) {
 }
 
 func (h *StartUpsHandler) Restore(id flake.ID) (res interface{}) {
+	fmt.Println(id)
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
 	if err := startupmodels.Startups.Restore(h.Ctx, uid, id); err != nil {
