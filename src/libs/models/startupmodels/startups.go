@@ -24,12 +24,12 @@ type startups struct {
 func (c *startups) List(ctx context.Context, input *coresSdk.ListStartupsInput, outputs interface{}) (total int, err error) {
 	filterStmt := ``
 	if input.CategoryId != 0 {
-		filterStmt += `AND t.category_id = ${categoryId}`
+		filterStmt += `AND s.category_id = ${categoryId}`
 	}
 	var keyword string
 	if input.Keyword != "" {
 		input.Keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
-		filterStmt += `AND t.name ILIKE ${keyword}`
+		filterStmt += `AND s.name ILIKE ${keyword}`
 	}
 
 	stmt := `
