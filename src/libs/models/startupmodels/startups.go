@@ -351,11 +351,9 @@ func (c *startups) Update(ctx context.Context, uid, id flake.ID, input *coresSdk
 func (c *startups) Restore(ctx context.Context, uid, id flake.ID) (err error) {
 	stmt := `
 		UPDATE startups s
-		SET (name,confirming_revision_id,updated_at)= (sr.name,current_revision_id,current_timestamp)
-		FROM startup_revisions sr
+		SET (confirming_revision_id,updated_at)= (current_revision_id,current_timestamp)
 		WHERE s.uid = ${uid}
-		  AND s.id = ${id}
-          AND sr.id = s.current_revision_id;
+		  AND s.id = ${id};
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
