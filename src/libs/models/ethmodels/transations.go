@@ -106,9 +106,11 @@ func (c *transactions) UpdateWithConfirmSource(ctx context.Context, id, sourceId
 
 func (c *transactions) ConfirmStartup(ctx context.Context, id flake.ID) (err error) {
 	stmt := `
-		UPDATE startups
+		UPDATE startups s
 		SET (current_revision_id,updated_at)= (confirming_revision_id,current_timestamp)
-		WHERE id = ${id};
+		FROM startup_revisions sr
+		WHERE sr.id = ${id}
+		AND sr.startup_id = s.id;
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
@@ -123,9 +125,11 @@ func (c *transactions) ConfirmStartup(ctx context.Context, id flake.ID) (err err
 
 func (c *transactions) ConfirmStartupSetting(ctx context.Context, id flake.ID) (err error) {
 	stmt := `
-		UPDATE startup_settings
+		UPDATE startup_settings s
 		SET (current_revision_id,updated_at)= (confirming_revision_id,current_timestamp)
-		WHERE id = ${id};
+		FROM startup_setting_revisions sr
+		WHERE sr.id = ${id}
+		AND sr.startup_setting_id = s.id;
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
