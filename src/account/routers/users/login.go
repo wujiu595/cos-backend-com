@@ -62,6 +62,7 @@ func (h *Guest) Login() (res interface{}) {
 
 	res = apires.With(account.UserResult{
 		Id:        user.Id,
+		Avatar:    user.Avatar,
 		PublicKey: user.PublicKey,
 		IsHunter:  user.IsHunter,
 	})
