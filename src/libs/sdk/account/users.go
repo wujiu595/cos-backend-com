@@ -11,6 +11,7 @@ type Signature string
 
 type UsersModel struct {
 	Id            flake.ID  `json:"id" db:"id"`                        // id (PK)
+	Avatar        string    `json:"avatar" db:"avatar"`                // avatar
 	PublicKey     string    `json:"PublicKey" db:"public_key"`         // public_key
 	Nonce         string    `json:"nonce" db:"nonce"`                  // nonce
 	PublicSecret  string    `json:"publicSecret" db:"public_secret"`   // public_secret
@@ -36,5 +37,6 @@ type LoginInput struct {
 type UserResult struct {
 	Id        flake.ID `json:"id" db:"id"`                // id (PK)
 	PublicKey string   `json:"publicKey" db:"public_key"` // wallet_addr
+	Avatar    string   `json:"avatar" db:"avatar"`        // avatar
 	IsHunter  bool     `json:"isHunter" db:"is_hunter"`   // is_hunter
 }

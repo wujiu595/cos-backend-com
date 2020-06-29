@@ -247,6 +247,7 @@ COMMENT ON COLUMN comunion.transactions.state IS '1 等待确认，2 已确认�
 
 CREATE TABLE comunion.users (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
+    avatar text  NOT NULL,
     public_key text NOT NULL,
     nonce text NOT NULL,
     public_secret text NOT NULL,

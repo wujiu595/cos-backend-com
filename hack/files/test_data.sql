@@ -5,10 +5,10 @@
 /*
     创建成功，设置成功
 */
-INSERT INTO comunion.users (id, public_key, nonce, public_secret, private_secret, created_at, updated_at, is_hunter)
-VALUES (comunion.fake_id('u-1'), '0x18fbdc8ed9018ae125f501f07d735faa0552c9d8', '659639759',
-        '4stvrdi66tq3nj5yt06zbcqz8alr5tvx', 'cnbqyiz8ujdi6wjp5nbr', '2020-05-31 06:57:29.439556',
-        '2020-05-31 06:57:29.439556', FALSE);
+-- INSERT INTO comunion.users (id, avatar, public_key, nonce, public_secret, private_secret, created_at, updated_at, is_hunter)
+-- VALUES (comunion.fake_id('u-1') ,'https://file.comunion.io/comunion-dev/avatar/default-avatar1.png', '0x18fbdc8ed9018ae125f501f07d735faa0552c9d8', '659639759',
+--         '4stvrdi66tq3nj5yt06zbcqz8alr5tvx', 'cnbqyiz8ujdi6wjp5nbr', '2020-05-31 06:57:29.439556',
+--         '2020-05-31 06:57:29.439556', FALSE);
 INSERT INTO comunion.startups (id, name, uid, current_revision_id, confirming_revision_id, created_at, updated_at)
 VALUES (comunion.fake_id('s-1'), 'wujiu2020', comunion.fake_id('u-1'), comunion.fake_id('sr-1'), comunion.fake_id('sr-1'),
         '2020-06-13 15:56:02.466872',

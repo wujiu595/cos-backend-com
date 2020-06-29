@@ -2,6 +2,7 @@ package usermodels
 
 import (
 	"context"
+	accountEnv "cos-backend-com/src/account"
 	"cos-backend-com/src/common/dbconn"
 	"cos-backend-com/src/common/flake"
 	"cos-backend-com/src/common/util"
@@ -20,7 +21,8 @@ const (
 )
 
 var (
-	keyAlphabets = []byte("0ictnbprkfs21zeovqj6wuldhymag748359x")
+	keyAlphabets   = []byte("0ictnbprkfs21zeovqj6wuldhymag748359x")
+	defaultAvatars = []string{"default-avatar1.png", "default-avatar2.png", "default-avatar3.png", "default-avatar4.png", "default-avatar5.png"}
 )
 
 var Users = &users{
@@ -68,11 +70,12 @@ func (p *users) Create(ctx context.Context, publicKey string, output interface{}
 		return err
 	}
 	stmt := `
-		INSERT INTO users(public_key,private_secret,public_secret, nonce)
-		VALUES (${publicKey}, ${private_secret}, ${public_secret}, ${nonce})
+		INSERT INTO users(avatar, public_key,private_secret,public_secret, nonce)
+		VALUES (${avatar}, ${publicKey}, ${private_secret}, ${public_secret}, ${nonce})
 		RETURNING *;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+		"{avatar}":         RangeAvatar(),
 		"{publicKey}":      publicKey,
 		"{nonce}":          nonce,
 		"{private_secret}": CreateAccessKey(uid),
@@ -141,4 +144,9 @@ func CreateSecretKey() string {
 func CreateNonce() string {
 	rand.Seed(time.Now().UnixNano())
 	return fmt.Sprintf("%06v", rand.Intn(1000000000))
+}
+
+func RangeAvatar() string {
+	rand.Seed(time.Now().UnixNano())
+	return "https://" + accountEnv.Env.Minio.Endpoint + "/" + accountEnv.Env.Minio.StaticBucket + "/avatar/" + defaultAvatars[rand.Intn(4)]
 }
