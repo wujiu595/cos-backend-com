@@ -142,6 +142,23 @@ CREATE SEQUENCE comunion.global_id_sequence
 
 
 --
+-- Name: hunters; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.hunters (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    user_id bigint NOT NULL,
+    name text NOT NULL,
+    skills text[] NOT NULL,
+    about text NOT NULL,
+    description_addr text NOT NULL,
+    email text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: startup_revisions; Type: TABLE; Schema: comunion; Owner: -
 --
 
@@ -247,7 +264,7 @@ COMMENT ON COLUMN comunion.transactions.state IS '1 等待确认，2 已确认�
 
 CREATE TABLE comunion.users (
     id bigint DEFAULT comunion.id_generator() NOT NULL,
-    avatar text  NOT NULL,
+    avatar text NOT NULL,
     public_key text NOT NULL,
     nonce text NOT NULL,
     public_secret text NOT NULL,
@@ -264,6 +281,14 @@ CREATE TABLE comunion.users (
 
 ALTER TABLE ONLY comunion.categories
     ADD CONSTRAINT categories_id_pk PRIMARY KEY (id);
+
+
+--
+-- Name: hunters hunters_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.hunters
+    ADD CONSTRAINT hunters_id_pk PRIMARY KEY (id);
 
 
 --
@@ -347,6 +372,13 @@ CREATE UNIQUE INDEX categories_code ON comunion.categories USING btree (code);
 --
 
 CREATE UNIQUE INDEX categories_name ON comunion.categories USING btree (name);
+
+
+--
+-- Name: hunters_user_id_uindex; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX hunters_user_id_uindex ON comunion.hunters USING btree (user_id);
 
 
 --
