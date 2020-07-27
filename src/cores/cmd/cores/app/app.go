@@ -7,6 +7,7 @@ import (
 	"cos-backend-com/src/cores"
 	"cos-backend-com/src/cores/routers/categories"
 	"cos-backend-com/src/cores/routers/files"
+	"cos-backend-com/src/cores/routers/hunters"
 	"cos-backend-com/src/cores/routers/startups"
 	"cos-backend-com/src/libs/auth"
 	"cos-backend-com/src/libs/filters"
@@ -129,6 +130,24 @@ func (p *appConfig) ConfigRoutes() {
 			s.Get(categories.CategoriesHandler{}).Action("List"),
 			s.Router("/:id",
 				s.Get(categories.CategoriesHandler{}).Action("Get"),
+			),
+		),
+
+		s.Router("/hunters",
+			s.Router("/:id",
+				s.Get(hunters.HuntersHandler{}).Action("Get"),
+			),
+		),
+
+		s.Router("/hunters",
+			s.Filter(filters.LoginRequiredInner),
+			s.Post(hunters.HuntersHandler{}).Action("Create"),
+			s.Put(hunters.HuntersHandler{}).Action("Update"),
+			s.Router("/:id",
+				s.Get(hunters.HuntersHandler{}).Action("Get"),
+			),
+			s.Router("/me",
+				s.Get(hunters.HuntersHandler{}).Action("GetMe"),
 			),
 		),
 
