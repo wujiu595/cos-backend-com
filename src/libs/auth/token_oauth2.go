@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/qiniu/x/rpc"
 	"github.com/wujiu2020/strip"
-	"qiniupkg.com/x/rpc.v7"
 )
 
 type OAuth2Config struct {

@@ -6,7 +6,7 @@ import (
 	"cos-backend-com/src/libs/models/ethmodels"
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
 
-	"qiniupkg.com/x/log.v7"
+	"github.com/qiniu/x/log"
 )
 
 type Updater struct {

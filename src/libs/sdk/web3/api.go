@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	rpc "qiniupkg.com/x/rpc.v7"
+	"github.com/qiniu/x/rpc"
 )
 
 type Web3Service interface {

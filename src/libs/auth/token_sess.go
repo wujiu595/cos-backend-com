@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/qiniu/x/rpc"
 	"github.com/wujiu2020/strip"
 	"github.com/wujiu2020/strip/sessions"
-	"qiniupkg.com/x/rpc.v7"
 
 	"cos-backend-com/src/libs/apierror"
 )
