@@ -6,7 +6,7 @@ import (
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
 
 	"github.com/ethereum/go-ethereum/common"
-	"qiniupkg.com/x/log.v7"
+	"github.com/qiniu/x/log"
 )
 
 type Confirmer struct {

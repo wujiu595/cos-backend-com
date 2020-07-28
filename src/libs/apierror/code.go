@@ -7,9 +7,9 @@ import (
 	"net/url"
 
 	"github.com/lib/pq"
+	"github.com/qiniu/x/rpc"
 	"github.com/wujiu2020/strip/utils/apires"
 	"gopkg.in/go-playground/validator.v9"
-	"qiniupkg.com/x/rpc.v7"
 )
 
 var (
