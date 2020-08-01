@@ -9,6 +9,7 @@ import (
 	"cos-backend-com/src/cores/routers/files"
 	"cos-backend-com/src/cores/routers/hunters"
 	"cos-backend-com/src/cores/routers/startups"
+	"cos-backend-com/src/cores/routers/tags"
 	"cos-backend-com/src/libs/auth"
 	"cos-backend-com/src/libs/filters"
 	filesSdk "cos-backend-com/src/libs/sdk/files"
@@ -131,6 +132,10 @@ func (p *appConfig) ConfigRoutes() {
 			s.Router("/:id",
 				s.Get(categories.CategoriesHandler{}).Action("Get"),
 			),
+		),
+
+		s.Router("/tags",
+			s.Get(tags.TagsHandler{}).Action("List"),
 		),
 
 		s.Router("/hunters",
