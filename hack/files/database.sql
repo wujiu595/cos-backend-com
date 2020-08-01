@@ -235,6 +235,27 @@ CREATE TABLE comunion.startups (
 
 
 --
+-- Name: tags; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.tags (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    name text NOT NULL,
+    source text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: COLUMN tags.source; Type: COMMENT; Schema: comunion; Owner: -
+--
+
+COMMENT ON COLUMN comunion.tags.source IS 'skills';
+
+
+--
 -- Name: transactions; Type: TABLE; Schema: comunion; Owner: -
 --
 
@@ -324,6 +345,14 @@ ALTER TABLE ONLY comunion.startups
 
 
 --
+-- Name: tags tags_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.tags
+    ADD CONSTRAINT tags_id_pk PRIMARY KEY (id);
+
+
+--
 -- Name: transactions transactions_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
 --
 
@@ -407,6 +436,13 @@ CREATE UNIQUE INDEX startup_settings_startup_id ON comunion.startup_settings USI
 --
 
 CREATE UNIQUE INDEX startups_name_idx ON comunion.startups USING btree (name) WHERE ((current_revision_id IS NOT NULL) AND (confirming_revision_id IS NOT NULL));
+
+
+--
+-- Name: tags_source_name; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX tags_source_name ON comunion.tags USING btree (source, name);
 
 
 --
