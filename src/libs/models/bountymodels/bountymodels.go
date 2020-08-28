@@ -27,25 +27,26 @@ type bounties struct {
 
 func (c *bounties) CreateBounty(ctx context.Context, startupId, uid flake.ID, input *coresSdk.CreateBountyInput) (err error) {
 	stmt := `
-		INSERT INTO bounties(id, startup_id, user_id, title, type, keywords, contact_email, intro, description_addr, ipfs_addr,
+		INSERT INTO bounties(id, startup_id, user_id, title, type, keywords, contact_email, intro, description_addr, description_file_addr,
 			duration, expired_at, payments)
 		VALUES (${id}, ${startupId}, ${userId}, ${title}, ${type}, ARRAY [${keywords}], ${contactEmail}, ${intro}, ${descriptionAddr},
 			${ipfsAddr}, ${duration}, ${expiredAt}, ${payments});
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{Id}":              input.Id,
-		"{startupId}":       startupId,
-		"{uid}":             uid,
-		"{title}":           input.Title,
-		"{type}":            input.Type,
-		"{keywords}":        input.Keywords,
-		"{contactEmail}":    input.ContactEmail,
-		"{intro}":           input.Intro,
-		"{descriptionAddr}": input.DescriptionAddr,
-		"{duration}":        input.Duration,
-		"{expiredAt}":       time.Now().Add(time.Duration(input.Duration) * time.Hour * 24),
-		"{payments}":        input.Payments,
+		"{Id}":                  input.Id,
+		"{startupId}":           startupId,
+		"{uid}":                 uid,
+		"{title}":               input.Title,
+		"{type}":                input.Type,
+		"{keywords}":            input.Keywords,
+		"{contactEmail}":        input.ContactEmail,
+		"{intro}":               input.Intro,
+		"{descriptionAddr}":     input.DescriptionAddr,
+		"{descriptionFileAddr}": input.DescriptionFileAddr,
+		"{duration}":            input.Duration,
+		"{expiredAt}":           time.Now().AddDate(0, 0, input.Duration),
+		"{payments}":            input.Payments,
 	})
 
 	return c.Invoke(ctx, func(db *sqlx.Tx) error {
@@ -102,7 +103,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 	joinCondition := ``
 
 	if uid != 0 {
-		joinCondition += "INNER JOIN bounties_hunters_rel bhr ON bhr.bounty_id = b.id AND bhr.hunter_id = ${uid}"
+		joinCondition += "INNER JOIN bounties_hunters_rel bhr ON bhr.bounty_id = b.id AND bhr.uid = ${uid}"
 	}
 
 	if isOwner {
@@ -137,13 +138,14 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
         ` + joinCondition + `
 		WHERE 1=1 
 		` + plan.Conditions + `
-		ORDER BY is_open,created_at DESC
-		LIMIT ${limit} OFFSET ${offset}
+		` + plan.OrderBySql + `
+		` + plan.LimitSql + `
 	),bounty_hunter_rels_cte AS (
-	    SELECT bc.id bounty_id,bhr.*,u.name FROM bounties_cte bc
+	    SELECT bhr.*,COALESCE(h.name, u.public_key)
+		FROM bounties_cte bc
 	    LEFT JOIN bounties_hunters_rel bhr ON bhr.bounty_id = bc.id
-	    INNER JOIN users u ON u.id = bhr.hunter_id
-	
+	    INNER JOIN users u ON bhr.uid = u.id 
+		LEFT JOIN hunters h ON u.id = h.user_id
 	),bounty_hunter_rels_aggregate_cte AS (
 	    SELECT bhrc.bounty_id,json_agg(bhrc) hunters
 	    FROM bounty_hunter_rels_cte bhrc

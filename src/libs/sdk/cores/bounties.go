@@ -42,16 +42,17 @@ const (
 )
 
 type CreateBountyInput struct {
-	Id              flake.ID       `json:"id" validate:"required"`
-	Title           string         `json:"title" validate:"required"`
-	TxId            string         `json:"txId" validate:"required"`
-	Type            string         `json:"type" validate:"func=self.Validate"`
-	Keywords        []string       `json:"keywords"`
-	ContactEmail    string         `json:"contactEmail" validate:"required"`
-	Intro           string         `json:"intro" validate:"required"`
-	DescriptionAddr string         `json:"descriptionAddr"`
-	Duration        int32          `json:"duration" validate:"required"`
-	Payments        types.JSONText `json:"payments" validate:"required"`
+	Id                  flake.ID       `json:"id" validate:"required"`
+	Title               string         `json:"title" validate:"required"`
+	TxId                string         `json:"txId" validate:"required"`
+	Type                string         `json:"type" validate:"func=self.Validate"`
+	Keywords            []string       `json:"keywords"`
+	ContactEmail        string         `json:"contactEmail" validate:"required"`
+	Intro               string         `json:"intro" validate:"required"`
+	DescriptionAddr     string         `json:"descriptionAddr"`
+	DescriptionFileAddr string         `json:"descriptionAddr"`
+	Duration            int            `json:"duration" validate:"required"`
+	Payments            types.JSONText `json:"payments" validate:"required"`
 }
 
 type BountyOutput struct {
@@ -61,11 +62,14 @@ type BountyOutput struct {
 		Name string   `json:"name" db:"name"`
 	} `json:"startupId" db:"startup_id"`
 	Uid                 flake.ID       `json:"uid" db:"uid"`
+	Type                string         `json:"type" db:"type"`
+	Keywords            []string       `json:"keywords" db:"keywords"`
+	Intro               string         `json:"intro" db:"intro"`
 	ContactEmail        string         `json:"contactEmail" db:"contact_email"`
-	BlockAddr           string         `json:"blockAddr" db:"block_addr"`
 	DescriptionAddr     string         `json:"descriptionAddr" db:"description_addr"`
 	DescriptionFileAddr string         `json:"descriptionFileAddr" db:"description_file_addr"`
-	Payments            types.JSONText `json:"payments" validate:"required"`
+	Duration            int            `json:"duration" db:"duration"`
+	Payments            types.JSONText `json:"payments" db:"payments"`
 	Hunters             []struct {
 		HunterId    flake.ID              `json:"hunterId" db:"hunter_id"`       // hunter_id
 		Name        string                `json:"name" db:"name"`                // name
@@ -77,6 +81,7 @@ type BountyOutput struct {
 		PaidTokens  types.JSONText        `json:"paidTokens" db:"paid_tokens"`   // paid_tokens
 	} `json:"hunters" db:"hunters"`
 	Status           BountyStatus         `json:"status" db:"status"`
+	BlockAddr        string               `json:"blockAddr" db:"block_addr"`
 	TransactionState eth.TransactionState `json:"transactionState" db:"transaction_state"`
 }
 

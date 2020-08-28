@@ -124,7 +124,7 @@ func (h *BountiesHandler) GetBounty(id flake.ID) (res interface{}) {
 	return
 }
 
-func (h *BountiesHandler) GetStartupBounty(id flake.ID) (res interface{}) {
+func (h *BountiesHandler) GetBountyMe(id flake.ID) (res interface{}) {
 	var output cores.BountyOutput
 	if err := bountymodels.Bounties.GetBounty(h.Ctx, id, true, &output); err != nil {
 		h.Log.Warn(err)
