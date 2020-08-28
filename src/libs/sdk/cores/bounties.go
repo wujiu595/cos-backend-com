@@ -42,17 +42,20 @@ const (
 )
 
 type CreateBountyInput struct {
-	Id                  flake.ID       `json:"id" validate:"required"`
-	Title               string         `json:"title" validate:"required"`
-	TxId                string         `json:"txId" validate:"required"`
-	Type                string         `json:"type" validate:"func=self.Validate"`
-	Keywords            []string       `json:"keywords"`
-	ContactEmail        string         `json:"contactEmail" validate:"required"`
-	Intro               string         `json:"intro" validate:"required"`
-	DescriptionAddr     string         `json:"descriptionAddr"`
-	DescriptionFileAddr string         `json:"descriptionAddr"`
-	Duration            int            `json:"duration" validate:"required"`
-	Payments            types.JSONText `json:"payments" validate:"required"`
+	Id                  flake.ID   `json:"id" validate:"required"`
+	Title               string     `json:"title" validate:"required"`
+	TxId                string     `json:"txId" validate:"required"`
+	Type                BountyType `json:"type" validate:"func=self.Validate"`
+	Keywords            []string   `json:"keywords"`
+	ContactEmail        string     `json:"contactEmail" validate:"required"`
+	Intro               string     `json:"intro" validate:"required"`
+	DescriptionAddr     string     `json:"descriptionAddr"`
+	DescriptionFileAddr string     `json:"descriptionFileAddr"`
+	Duration            int        `json:"duration" validate:"required"`
+	Payments            []struct {
+		Token string  `json:"token"`
+		Value float64 `json:"value"`
+	} `json:"payments" validate:"required"`
 }
 
 type BountyOutput struct {
@@ -60,8 +63,8 @@ type BountyOutput struct {
 	Startup struct {
 		Id   flake.ID `json:"id" db:"id"`
 		Name string   `json:"name" db:"name"`
-	} `json:"startupId" db:"startup_id"`
-	Uid                 flake.ID       `json:"uid" db:"uid"`
+	} `json:"startup" db:"startup"`
+	UserId              flake.ID       `json:"userId" db:"user_id"`
 	Type                string         `json:"type" db:"type"`
 	Keywords            []string       `json:"keywords" db:"keywords"`
 	Intro               string         `json:"intro" db:"intro"`
@@ -71,6 +74,7 @@ type BountyOutput struct {
 	Duration            int            `json:"duration" db:"duration"`
 	Payments            types.JSONText `json:"payments" db:"payments"`
 	Hunters             []struct {
+		UserId      flake.ID              `json:"userId" db:"user_id"`
 		HunterId    flake.ID              `json:"hunterId" db:"hunter_id"`       // hunter_id
 		Name        string                `json:"name" db:"name"`                // name
 		Status      BountyHunterRelStatus `json:"status" db:"status"`            // status

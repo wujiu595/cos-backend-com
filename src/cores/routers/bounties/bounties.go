@@ -75,7 +75,7 @@ func (h *BountiesHandler) ListStartupBountiesMe(startupId flake.ID) (res interfa
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
 	var output cores.ListBountiesResult
-	total, err := bountymodels.Bounties.ListBounties(h.Ctx, startupId, uid, true, &params, &output.Result)
+	total, err := bountymodels.Bounties.ListBounties(h.Ctx, startupId, 0, true, &params, &output.Result)
 	if err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
@@ -139,6 +139,11 @@ func (h *BountiesHandler) GetBountyMe(id flake.ID) (res interface{}) {
 func (h *BountiesHandler) Create(startupId flake.ID) (res interface{}) {
 	var input cores.CreateBountyInput
 	if err := h.Params.BindJsonBody(&input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+	if err := validate.Default.Struct(input); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return

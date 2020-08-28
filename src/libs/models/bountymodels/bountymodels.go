@@ -5,6 +5,7 @@ import (
 	"cos-backend-com/src/common/dbconn"
 	"cos-backend-com/src/common/dbquery"
 	"cos-backend-com/src/common/flake"
+	"cos-backend-com/src/common/types"
 	"cos-backend-com/src/common/util"
 	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models"
@@ -30,13 +31,13 @@ func (c *bounties) CreateBounty(ctx context.Context, startupId, uid flake.ID, in
 		INSERT INTO bounties(id, startup_id, user_id, title, type, keywords, contact_email, intro, description_addr, description_file_addr,
 			duration, expired_at, payments)
 		VALUES (${id}, ${startupId}, ${userId}, ${title}, ${type}, ARRAY [${keywords}], ${contactEmail}, ${intro}, ${descriptionAddr},
-			${ipfsAddr}, ${duration}, ${expiredAt}, ${payments});
+			${descriptionFileAddr}, ${duration}, ${expiredAt}, ${payments});
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{Id}":                  input.Id,
+		"{id}":                  input.Id,
 		"{startupId}":           startupId,
-		"{uid}":                 uid,
+		"{userId}":              uid,
 		"{title}":               input.Title,
 		"{type}":                input.Type,
 		"{keywords}":            input.Keywords,
@@ -46,7 +47,7 @@ func (c *bounties) CreateBounty(ctx context.Context, startupId, uid flake.ID, in
 		"{descriptionFileAddr}": input.DescriptionFileAddr,
 		"{duration}":            input.Duration,
 		"{expiredAt}":           time.Now().AddDate(0, 0, input.Duration),
-		"{payments}":            input.Payments,
+		"{payments}":            types.JSONAny{input.Payments},
 	})
 
 	return c.Invoke(ctx, func(db *sqlx.Tx) error {
@@ -81,7 +82,7 @@ func (c *bounties) ListBounties(ctx context.Context, startupId, uid flake.ID, is
 		plan.AddCond(`AND b.startup_id = ${startupId}`)
 	}
 
-	plan.OrderBySql = ` ORDER BY is_open,created_at DESC`
+	plan.OrderBySql = ` ORDER BY is_open ASC,created_at DESC`
 	plan.LimitSql = ` LIMIT ${limit} OFFSET ${offset}`
 
 	plan.Params = map[string]interface{}{
@@ -98,7 +99,8 @@ func (c *bounties) ListBounties(ctx context.Context, startupId, uid flake.ID, is
 
 func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m interface{}, plan *dbquery.Plan) (total int, err error) {
 	filterSql := `
-	FROM bounties b
+        FROM bounties b
+        INNER JOIN startups s ON s.id = b.startup_id
 	`
 	joinCondition := ``
 
@@ -133,7 +135,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 
 	query := `
 	WITH bounties_cte AS (
-		SELECT b.*,t.block_addr, t.state transaction_state, current_timestamp>b.expired_at is_open
+		SELECT b.*,t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name) startup
 		` + filterSql + `
         ` + joinCondition + `
 		WHERE 1=1 
@@ -141,20 +143,19 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 		` + plan.OrderBySql + `
 		` + plan.LimitSql + `
 	),bounty_hunter_rels_cte AS (
-	    SELECT bhr.*,COALESCE(h.name, u.public_key)
+		SELECT bhr.bounty_id,h.id hunter_id, bhr.uid as user_id, bhr.status, bhr.started_at, bhr.submitted_at, bhr.quited_at, bhr.paid_at, bhr.paid_tokens,COALESCE(h.name, u.public_key) AS name
 		FROM bounties_cte bc
-	    LEFT JOIN bounties_hunters_rel bhr ON bhr.bounty_id = bc.id
-	    INNER JOIN users u ON bhr.uid = u.id 
+		LEFT JOIN bounties_hunters_rel bhr ON bhr.bounty_id = bc.id
+		LEFT JOIN users u ON bhr.uid = u.id
 		LEFT JOIN hunters h ON u.id = h.user_id
 	),bounty_hunter_rels_aggregate_cte AS (
-	    SELECT bhrc.bounty_id,json_agg(bhrc) hunters
-	    FROM bounty_hunter_rels_cte bhrc
-	    GROUP BY bhrc.bounty_id
-	)
-	,res AS (
-	    SELECT bc.*,bhrac.hunters
+		SELECT bhrc.bounty_id, COALESCE(json_agg(bhrc), '[]'::json) hunters
+		FROM bounty_hunter_rels_cte bhrc
+		GROUP BY bhrc.bounty_id
+	),res AS (
+	    SELECT bc.*, COALESCE(bhrac.hunters, '[]'::json) hunters
 	    FROM bounties_cte bc
-	    INNER JOIN bounty_hunter_rels_aggregate_cte bhrac ON bc.id = bhrac.bounty_id
+	    LEFT JOIN bounty_hunter_rels_aggregate_cte bhrac ON bc.id = bhrac.bounty_id
 	)
 	SELECT
 		COALESCE(json_agg(r.*), '[]'::json)
