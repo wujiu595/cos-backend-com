@@ -5,6 +5,7 @@ import (
 	"cos-backend-com/src/common/providers/session"
 	"cos-backend-com/src/common/util"
 	"cos-backend-com/src/cores"
+	"cos-backend-com/src/cores/routers/bounties"
 	"cos-backend-com/src/cores/routers/categories"
 	"cos-backend-com/src/cores/routers/files"
 	"cos-backend-com/src/cores/routers/hunters"
@@ -159,6 +160,35 @@ func (p *appConfig) ConfigRoutes() {
 		s.Router("/files",
 			s.Filter(filters.LoginRequiredInner),
 			s.Post(files.FilesHandler{}).Action("SignUploadFile"),
+		),
+
+		s.Router("/prepareId",
+			s.Get(startups.StartUpsHandler{}).Action("GetPrepareId"),
+		),
+
+		s.Router("/startups/:id/bounties",
+			s.Get(bounties.BountiesHandler{}).Action("ListStartupBounties"),
+			s.Router("/me",
+				s.Get(bounties.BountiesHandler{}).Action("ListStartupBountiesMe"),
+			),
+			s.Post(bounties.BountiesHandler{}).Filter(filters.LoginRequiredInner).Action("Create"),
+			s.Router("/:id",
+				s.Get(bounties.BountiesHandler{}).Action("GetStartupBounty"),
+			),
+		),
+
+		s.Router("/bounties",
+			s.Get(bounties.BountiesHandler{}).Action("ListBounties"),
+			s.Router("/me",
+				s.Filter(filters.LoginRequiredInner),
+				s.Get(bounties.BountiesHandler{}).Action("ListBountiesMe"),
+			),
+			s.Router("/:id",
+				s.Get(bounties.BountiesHandler{}).Action("GetBounty"),
+				//s.Router("/:startWork",
+				//	s.Get(bounties.BountiesHandler{}).Action("StartWork"),
+				//),
+			),
 		),
 	)
 }

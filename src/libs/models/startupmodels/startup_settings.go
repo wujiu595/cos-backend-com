@@ -10,7 +10,6 @@ import (
 	"cos-backend-com/src/libs/models/ethmodels"
 	coresSdk "cos-backend-com/src/libs/sdk/cores"
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
-	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -48,8 +47,6 @@ func (c *startupSettings) UpsertWithRevision(ctx context.Context, startupId flak
 			"{id}":                   *startupSettingId,
 			"{confirmingRevisionId}": startupSettingsRevisionId,
 		})
-
-		fmt.Println(startupSettingId, startupSettingsRevisionId)
 
 		return c.Invoke(newCtx, func(db dbconn.Q) (er error) {
 			_, er = db.ExecContext(newCtx, query, args...)
