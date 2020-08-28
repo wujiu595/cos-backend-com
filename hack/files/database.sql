@@ -108,6 +108,49 @@ CREATE TABLE comunion.access_tokens (
 
 
 --
+-- Name: bounties; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.bounties (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    startup_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    title text NOT NULL,
+    type text NOT NULL,
+    keywords text[] NOT NULL,
+    contact_email text NOT NULL,
+    intro text NOT NULL,
+    description_addr text NOT NULL,
+    description_file_addr text,
+    duration smallint NOT NULL,
+    expired_at timestamp with time zone NOT NULL,
+    payments jsonb DEFAULT '[]'::jsonb NOT NULL,
+    status integer DEFAULT 0 NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: bounties_hunters_rel; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.bounties_hunters_rel (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    bounty_id bigint NOT NULL,
+    uid bigint NOT NULL,
+    status integer DEFAULT 0 NOT NULL,
+    started_at timestamp with time zone,
+    submitted_at timestamp with time zone,
+    quited_at timestamp with time zone,
+    paid_at timestamp with time zone,
+    paid_tokens jsonb DEFAULT '[]'::jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: categories; Type: TABLE; Schema: comunion; Owner: -
 --
 
@@ -297,6 +340,22 @@ CREATE TABLE comunion.users (
 
 
 --
+-- Name: bounties_hunters_rel bounties_hunters_rel_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.bounties_hunters_rel
+    ADD CONSTRAINT bounties_hunters_rel_pk PRIMARY KEY (id);
+
+
+--
+-- Name: bounties bounties_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.bounties
+    ADD CONSTRAINT bounties_id_pk PRIMARY KEY (id);
+
+
+--
 -- Name: categories categories_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
 --
 
@@ -387,6 +446,13 @@ CREATE INDEX access_tokens_created_at_index ON comunion.access_tokens USING btre
 --
 
 CREATE UNIQUE INDEX access_tokens_refresh_uindex ON comunion.access_tokens USING btree (refresh);
+
+
+--
+-- Name: bounties_hunters_rel_bounty_id_hunter_id; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX bounties_hunters_rel_bounty_id_hunter_id ON comunion.bounties_hunters_rel USING btree (bounty_id, uid);
 
 
 --

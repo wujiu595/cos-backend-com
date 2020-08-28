@@ -25,6 +25,7 @@ type TransactionSource string
 
 const (
 	TransactionSourceStartup        TransactionSource = "startup"
+	TransactionSourceBounty         TransactionSource = "bounty"
 	TransactionSourceStartupSetting TransactionSource = "startupSetting"
 )
 
