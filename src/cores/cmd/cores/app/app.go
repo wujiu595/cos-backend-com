@@ -113,7 +113,7 @@ func (p *appConfig) ConfigRoutes() {
 
 			s.Router("/:id",
 				s.Put(startups.StartUpsHandler{}).Action("Update"),
-				s.Get(startups.StartUpsHandler{}).Action("Get"),
+				//s.Get(startups.StartUpsHandler{}).Action("Get"),
 				s.Router("/settings",
 					s.Put(startups.StartUpSettingsHandler{}).Action("Update"),
 				),

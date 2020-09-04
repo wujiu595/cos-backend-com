@@ -160,7 +160,8 @@ func (c *startups) Get(ctx context.Context, id flake.ID, output interface{}) (er
 			sr.description_addr,
 			c   AS category,
 			ssr AS settings,
-			t1  AS transaction
+			t1  AS transaction,
+			(SELECT count(*) FROM startups_follows_rel sfr WHERE s.id = sfr.startup_id) AS follow_count
 	    FROM startups s
 			INNER JOIN startup_revisions sr ON s.current_revision_id = sr.id
 			INNER JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup} AND t1.state = ${stateSuccess}
@@ -195,7 +196,8 @@ func (c *startups) GetMe(ctx context.Context, uid, id flake.ID, output interface
 			sr.description_addr,
 			c   AS category,
 			ssr AS settings,
-			t1  AS transaction
+			t1  AS transaction,
+			(SELECT count(*) FROM startups_follows_rel sfr WHERE s.id = sfr.startup_id) AS follow_count
 	    FROM startups s
 			LEFT JOIN startup_revisions sr ON s.confirming_revision_id = sr.id
 			LEFT JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup}

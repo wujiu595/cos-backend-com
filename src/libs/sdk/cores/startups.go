@@ -35,6 +35,7 @@ type StartUpResult struct {
 	Mission         *string                       `json:"mission" db:"mission"`
 	Logo            string                        `json:"logo" db:"logo"`
 	DescriptionAddr string                        `json:"descriptionAddr" db:"description_addr"`
+	FollowCount     int                           `json:"followCount" db:"follow_count"`
 	Category        CategoriesResult              `json:"category" db:"category"`
 	Setting         StartupSettingRevisionsResult `json:"settings" db:"settings"`
 	Transaction     eth.TransactionsResult        `json:"transaction" db:"transaction"`
