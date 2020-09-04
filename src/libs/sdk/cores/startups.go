@@ -71,5 +71,7 @@ type ListStartupsResult struct {
 		DescriptionAddr string           `json:"descriptionAddr" db:"description_addr"`
 		Category        CategoriesResult `json:"category" db:"category"`
 		IsIRO           bool             `json:"isIRO" db:"is_iro"`
+		BountyCount     int              `json:"bountyCount" db:"bounty_count"`
+		FollowCount     int              `json:"followCount" db:"follow_count"`
 	} `json:"result"`
 }

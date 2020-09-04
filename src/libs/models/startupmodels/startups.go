@@ -40,7 +40,9 @@ func (c *startups) List(ctx context.Context, input *coresSdk.ListStartupsInput, 
 				sr.logo,
 				sr.mission,
 				sr.description_addr,
-				c AS category
+				c AS category,
+				(SELECT count(*) FROM bounties b WHERE s.id = b.startup_id) AS bounty_count,
+				(SELECT count(*) FROM startups_follows_rel sfr WHERE s.id = sfr.startup_id) AS follow_count
 			FROM startups s
 				INNER JOIN startup_revisions sr ON s.current_revision_id = sr.id
 				INNER JOIN categories c ON c.id = sr.category_id
