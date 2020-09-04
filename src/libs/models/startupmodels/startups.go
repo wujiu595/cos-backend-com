@@ -169,6 +169,7 @@ func (c *startups) ListMeFollowed(ctx context.Context, uid flake.ID, input *core
 			    LEFT JOIN startup_settings ss ON s.id = ss.startup_id
 			    LEFT JOIN startup_setting_revisions ssr ON ss.confirming_revision_id = ssr.id
 			    LEFT JOIN transactions t2 ON t2.source_id = ssr.id AND t2.source = ${sourceStartupSetting}
+			WHERE 1=1
 			ORDER BY s.created_at DESC
 			LIMIT ${limit} OFFSET ${offset}
 		)
@@ -181,7 +182,7 @@ func (c *startups) ListMeFollowed(ctx context.Context, uid flake.ID, input *core
 		    INNER JOIN startup_revisions sr ON s.confirming_revision_id = sr.id
 		    INNER JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup}
 		    INNER JOIN categories c ON c.id = sr.category_id
-		WHERE s.uid = ${uid};
+			INNER JOIN startups_follows_rel sfr ON s.id = sfr.startup_id AND sfr.user_id = ${uid}
 	`
 
 	query, args := util.PgMapQuery(countStmt, map[string]interface{}{
