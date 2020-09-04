@@ -149,6 +149,68 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 	})
 }
 
+func (c *startups) ListMeFollowed(ctx context.Context, uid flake.ID, input *coresSdk.ListStartupsInput, outputs interface{}) (total int, err error) {
+	stmt := `
+		WITH res AS(
+			SELECT
+				s.id,
+				sr.name,
+				sr.logo,
+				sr.mission,
+				sr.description_addr,
+				c AS category,
+			    t1.state,
+			    t2.state AS setting_state
+			FROM startups s
+			    INNER JOIN startup_revisions sr ON s.confirming_revision_id = sr.id
+			    INNER JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup}
+			    INNER JOIN categories c ON c.id = sr.category_id
+				INNER JOIN startups_follows_rel sfr ON s.id = sfr.startup_id AND sfr.user_id = ${uid}
+			    LEFT JOIN startup_settings ss ON s.id = ss.startup_id
+			    LEFT JOIN startup_setting_revisions ssr ON ss.confirming_revision_id = ssr.id
+			    LEFT JOIN transactions t2 ON t2.source_id = ssr.id AND t2.source = ${sourceStartupSetting}
+			ORDER BY s.created_at DESC
+			LIMIT ${limit} OFFSET ${offset}
+		)
+		SELECT COALESCE(json_agg(r.*), '[]'::json) FROM res r;
+	`
+
+	countStmt := `
+		SELECT COUNT(*)
+		FROM startups s
+		    INNER JOIN startup_revisions sr ON s.confirming_revision_id = sr.id
+		    INNER JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup}
+		    INNER JOIN categories c ON c.id = sr.category_id
+		WHERE s.uid = ${uid};
+	`
+
+	query, args := util.PgMapQuery(countStmt, map[string]interface{}{
+		"{uid}":                  uid,
+		"{categoryId}":           input.CategoryId,
+		"{isIRO}":                input.IsIRO,
+		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
+	})
+
+	if err = c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
+		return db.GetContext(ctx, &total, query, args...)
+	}); err != nil {
+		return
+	}
+	query, args = util.PgMapQuery(stmt, map[string]interface{}{
+		"{uid}":                  uid,
+		"{categoryId}":           input.CategoryId,
+		"{isIRO}":                input.IsIRO,
+		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
+		"{offset}":               input.Offset,
+		"{limit}":                input.GetLimit(),
+	})
+	return total, c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
+		return db.GetContext(ctx, &util.PgJsonScanWrap{outputs}, query, args...)
+	})
+}
+
 func (c *startups) Get(ctx context.Context, id flake.ID, output interface{}) (err error) {
 	stmt := `
 	WITH res AS (
