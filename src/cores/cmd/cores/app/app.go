@@ -99,10 +99,6 @@ func (p *appConfig) ConfigRoutes() {
 			),
 		),
 
-		s.Router("/startups/:id/follows",
-			s.Post(follows.FollowsHandler{}).Action("Create"),
-		),
-
 		s.Router("/startups",
 			s.Filter(filters.LoginRequiredInner),
 			s.Post(startups.StartUpsHandler{}).Action("Create"),
@@ -118,7 +114,7 @@ func (p *appConfig) ConfigRoutes() {
 
 			s.Router("/:id",
 				s.Put(startups.StartUpsHandler{}).Action("Update"),
-				//s.Get(startups.StartUpsHandler{}).Action("Get"),
+				s.Get(startups.StartUpsHandler{}).Action("Get"),
 				s.Router("/settings",
 					s.Put(startups.StartUpSettingsHandler{}).Action("Update"),
 				),
@@ -130,6 +126,10 @@ func (p *appConfig) ConfigRoutes() {
 			//restore startup settings
 			s.Router("/:id/settings:restore",
 				s.Post(startups.StartUpSettingsHandler{}).Action("Restore"),
+			),
+
+			s.Router("/:id/follows",
+				s.Post(follows.FollowsHandler{}).Action("Create"),
 			),
 		),
 

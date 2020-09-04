@@ -5,6 +5,7 @@ import (
 	"cos-backend-com/src/cores/routers"
 	"cos-backend-com/src/libs/apierror"
 	"cos-backend-com/src/libs/models/followmodels"
+	"cos-backend-com/src/libs/sdk/cores"
 	"github.com/wujiu2020/strip/utils/apires"
 	"net/http"
 )
@@ -30,6 +31,8 @@ func (h *FollowsHandler) Create(startupId flake.ID) (res interface{}) {
 		return
 	}
 
-	res = apires.With(http.StatusOK)
+	res = apires.With(&cores.PrepareIdOutput{
+		id,
+	}, http.StatusOK)
 	return
 }
