@@ -16,15 +16,14 @@ type follows struct {
 	dbconn.Connector
 }
 
-func (c *follows) CreateFollow(ctx context.Context, startupId, uid flake.ID, id flake.ID) (err error) {
+func (c *follows) CreateFollow(ctx context.Context, startupId, uid flake.ID) (err error) {
 	stmt := `
-		INSERT INTO startups_follows_rel(id, startup_id, user_id)
-		VALUES (${id}, ${startupId},${uid});
+		INSERT INTO startups_follows_rel(startup_id, user_id)
+		VALUES (${startupId},${uid});
 	`
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{uid}":       uid,
-		"{id}":        id,
 		"{startupId}": startupId,
 	})
 
@@ -32,11 +31,4 @@ func (c *follows) CreateFollow(ctx context.Context, startupId, uid flake.ID, id 
 		_, er = db.ExecContext(ctx, query, args...)
 		return er
 	})
-}
-
-func (c *follows) NextId(ctx context.Context) (netxtId flake.ID, err error) {
-	err = c.Invoke(ctx, func(db dbconn.Q) error {
-		return db.GetContext(ctx, &netxtId, `SELECT id_generator()`)
-	})
-	return
 }
