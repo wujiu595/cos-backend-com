@@ -8,6 +8,7 @@ import (
 	"cos-backend-com/src/cores/routers/bounties"
 	"cos-backend-com/src/cores/routers/categories"
 	"cos-backend-com/src/cores/routers/files"
+	"cos-backend-com/src/cores/routers/follows"
 	"cos-backend-com/src/cores/routers/hunters"
 	"cos-backend-com/src/cores/routers/startups"
 	"cos-backend-com/src/cores/routers/tags"
@@ -106,6 +107,9 @@ func (p *appConfig) ConfigRoutes() {
 				s.Router("/:id",
 					s.Get(startups.StartUpsHandler{}).Action("GetMe"),
 				),
+				s.Router("/followed",
+					s.Get(startups.StartUpsHandler{}).Action("ListMeFollowed"),
+				),
 			),
 			s.Router("/prepareId",
 				s.Get(startups.StartUpsHandler{}).Action("GetPrepareId"),
@@ -125,6 +129,10 @@ func (p *appConfig) ConfigRoutes() {
 			//restore startup settings
 			s.Router("/:id/settings:restore",
 				s.Post(startups.StartUpSettingsHandler{}).Action("Restore"),
+			),
+
+			s.Router("/:id/follows",
+				s.Post(follows.FollowsHandler{}).Action("Create"),
 			),
 		),
 

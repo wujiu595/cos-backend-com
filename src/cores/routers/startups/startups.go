@@ -63,6 +63,30 @@ func (h *StartUpsHandler) ListMe() (res interface{}) {
 	return
 }
 
+func (h *StartUpsHandler) ListMeFollowed() (res interface{}) {
+	var params cores.ListStartupsInput
+	h.Params.BindValuesToStruct(&params)
+
+	if err := validate.Default.Struct(params); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+	var uid flake.ID
+	h.Ctx.Find(&uid, "uid")
+	var output cores.ListMeStartupsResult
+	total, err := startupmodels.Startups.ListMeFollowed(h.Ctx, uid, &params, &output.Result)
+	if err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+	output.Total = total
+
+	res = apires.With(&output, http.StatusOK)
+	return
+}
+
 func (h *StartUpsHandler) Create() (res interface{}) {
 	var input cores.CreateStartupInput
 	if err := h.Params.BindJsonBody(&input); err != nil {
