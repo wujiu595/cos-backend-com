@@ -69,7 +69,7 @@ jobs:
           username: ${{ secrets.DEV_USERNAME }}
           passphrase: ${{ secrets.DEV_PASSPHRASE }}
           key: ${{ secrets.DEV_KEY }}
-          source: "hack/docker/docker-compose-test.yml"
+          source: "hack/docker/docker-compose.yml"
           target: "${{ secrets.DOCKER_COMPOSE_FILE_PATH }}"
           strip_components: 2
       - name: Restart docker
