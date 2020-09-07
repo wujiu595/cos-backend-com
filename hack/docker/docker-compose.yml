@@ -1,74 +1,79 @@
 version: "3.3"
 
 networks:
-  default:
+  app:
+  traefik:
     external:
-      name: app
+      name: traefik_webgateway
 
 services:
   comunion-redis:
-    container_name: comunion-redis
+    container_name: comunion-back-redis
     image: redis:alpine
     restart: always
+    networks:
+      - app
 
   comunion-account:
-    image: ${COMUNION_ACCOUNT_IMAGE}
-    container_name: comunion-account
+    image: registry.comunion.io/comunion/cos-back-account:dev
+    container_name: comunion-back-account
     volumes:
       - /etc/localtime:/etc/localtime
     env_file:
       - ./comunion-conf.env
     environment:
-      PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
+      PG_MASTER: postgres://comunion:comunion2020@comunion-db:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
     depends_on:
       - comunion-redis
-    links:
-      - comunion-redis
     restart: always
-
-  comunion-cores:
-    image: ${COMUNION_CORES_IMAGE}
-    container_name: comunion-cores
-    volumes:
-      - /etc/localtime:/etc/localtime
-    env_file:
-      - ./comunion-conf.env
-    environment:
-      PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
-    depends_on:
-      - comunion-redis
-    links:
-      - comunion-redis
-    restart: always
-
-  comunion-eth:
-    image: ${COMUNION_ETH_IMAGE}
-    container_name: comunion-cores
-    volumes:
-      - /etc/localtime:/etc/localtime
-    env_file:
-      - ./comunion-conf.env
-    environment:
-      PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
-    depends_on:
-      - comunion-redis
-    links:
-      - comunion-redis
-    restart: always
+    networks:
+      - app
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_webgateway"
+      - "traefik.http.services.comunion-account.loadbalancer.server.port=80"
+      - "traefik.http.routers.comunion-account.rule=Host(`dev.comunion.io`) && PathPrefix(`/api/account`)"
+      - "traefik.http.routers.comunion-eth.entrypoints=websecure"
+      - "traefik.http.routers.comunion-eth.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.comunion-eth.middlewares=api-eth-stripprefix"
+      - "traefik.http.middlewares.api-eth-stripprefix.stripprefix.prefixes=/api/eth"
 
   comunion-notification:
-    image: ${COMUNION_NOTIFICATION_IMAGE}
-    container_name: comunion-cores
+    image: registry.comunion.io/comunion/cos-back-notification:dev
+    container_name: comunion-back-notification
     volumes:
       - /etc/localtime:/etc/localtime
     env_file:
       - ./comunion-conf.env
     environment:
-      PG_MASTER: postgres://comunion:comunion2020@localhost:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
+      PG_MASTER: postgres://comunion:comunion2020@comunion-db:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
     depends_on:
       - comunion-redis
-    links:
-      - comunion-redis
     restart: always
+    networks:
+      - app
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_webgateway"
+      - "traefik.http.services.comunion-notification.loadbalancer.server.port=80"
+      - "traefik.http.routers.comunion-notification.rule=Host(`dev.comunion.io`) && PathPrefix(`/api/notification`)"
+      - "traefik.http.routers.comunion-notification.entrypoints=websecure"
+      - "traefik.http.routers.comunion-notification.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.comunion-notification.middlewares=api-notification-stripprefix"
+      - "traefik.http.middlewares.api-notification-stripprefix.stripprefix.prefixes=/api/notification"
 
-  
+  comunion-db:
+    image: postgres:10.3-alpine
+    container_name: comunion-back-db
+    networks:
+      - app
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=comunion
+      - POSTGRES_PASSWORD=comunion2020
+      - POSTGRES_DB=comunion
