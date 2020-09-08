@@ -34,6 +34,56 @@ services:
       - "traefik.docker.network=traefik_webgateway"
       - "traefik.http.services.comunion-account.loadbalancer.server.port=80"
       - "traefik.http.routers.comunion-account.rule=Host(`dev.comunion.io`) && PathPrefix(`/api/account`)"
+      - "traefik.http.routers.comunion-account.entrypoints=websecure"
+      - "traefik.http.routers.comunion-account.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.comunion-account.middlewares=api-account-stripprefix"
+      - "traefik.http.middlewares.api-account-stripprefix.stripprefix.prefixes=/api/account"
+
+  comunion-cores:
+    image: registry.comunion.io/comunion/cos-back-cores:dev
+    container_name: comunion-back-cores
+    volumes:
+      - /etc/localtime:/etc/localtime
+    env_file:
+      - ./comunion-conf.env
+    environment:
+      PG_MASTER: postgres://comunion:comunion2020@comunion-db:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
+    depends_on:
+      - comunion-redis
+    restart: always
+    networks:
+      - app
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_webgateway"
+      - "traefik.http.services.comunion-cores.loadbalancer.server.port=80"
+      - "traefik.http.routers.comunion-cores.rule=Host(`dev.comunion.io`) && PathPrefix(`/api/cores`)"
+      - "traefik.http.routers.comunion-cores.entrypoints=websecure"
+      - "traefik.http.routers.comunion-cores.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.comunion-cores.middlewares=api-cores-stripprefix"
+      - "traefik.http.middlewares.api-cores-stripprefix.stripprefix.prefixes=/api/cores"
+
+  comunion-eth:
+    image: registry.comunion.io/comunion/cos-back-eth:dev
+    container_name: comunion-back-eth
+    volumes:
+      - /etc/localtime:/etc/localtime
+    env_file:
+      - ./comunion-conf.env
+    environment:
+      PG_MASTER: postgres://comunion:comunion2020@comunion-db:5432/comunion?sslmode=disable&connect_timeout=10&search_path=comunion&timezone=Asia/Shanghai
+    depends_on:
+      - comunion-redis
+    restart: always
+    networks:
+      - app
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_webgateway"
+      - "traefik.http.services.comunion-eth.loadbalancer.server.port=80"
+      - "traefik.http.routers.comunion-eth.rule=Host(`dev.comunion.io`) && PathPrefix(`/api/eth`)"
       - "traefik.http.routers.comunion-eth.entrypoints=websecure"
       - "traefik.http.routers.comunion-eth.tls.certresolver=mytlschallenge"
       - "traefik.http.routers.comunion-eth.middlewares=api-eth-stripprefix"
