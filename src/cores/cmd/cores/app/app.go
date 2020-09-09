@@ -133,6 +133,7 @@ func (p *appConfig) ConfigRoutes() {
 
 			s.Router("/:id/follows",
 				s.Post(follows.FollowsHandler{}).Action("Create"),
+				s.Delete(follows.FollowsHandler{}).Action("Delete"),
 			),
 		),
 
