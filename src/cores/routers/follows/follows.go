@@ -31,7 +31,7 @@ func (h *FollowsHandler) Delete(startupId flake.ID) (res interface{}) {
 	var uid flake.ID
 	h.Ctx.Find(&uid, "uid")
 
-	if err := followmodels.Follows.CreateFollow(h.Ctx, startupId, uid); err != nil {
+	if err := followmodels.Follows.DeleteFollow(h.Ctx, startupId, uid); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
