@@ -65,6 +65,7 @@ type BountyOutput struct {
 		Name string   `json:"name" db:"name"`
 	} `json:"startup" db:"startup"`
 	UserId              flake.ID       `json:"userId" db:"user_id"`
+	Title               string         `json:"title" db:"title"`
 	Type                string         `json:"type" db:"type"`
 	Keywords            []string       `json:"keywords" db:"keywords"`
 	Intro               string         `json:"intro" db:"intro"`
