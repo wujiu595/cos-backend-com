@@ -32,3 +32,19 @@ func (c *follows) CreateFollow(ctx context.Context, startupId, uid flake.ID) (er
 		return er
 	})
 }
+
+func (c *follows) DeleteFollow(ctx context.Context, startupId, uid flake.ID) (err error) {
+	stmt := `
+		DELETE FROM startups_follows_rel
+		WHERE startup_id = ${startupId} AND user_id = ${uid};
+	`
+	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+		"{uid}":       uid,
+		"{startupId}": startupId,
+	})
+
+	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
+		_, er = db.ExecContext(ctx, query, args...)
+		return er
+	})
+}
