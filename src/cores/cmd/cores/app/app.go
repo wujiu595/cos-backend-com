@@ -196,6 +196,9 @@ func (p *appConfig) ConfigRoutes() {
 				//	s.Get(bounties.BountiesHandler{}).Action("StartWork"),
 				//),
 			),
+			s.Router("/users/:userId",
+				s.Get(bounties.BountiesHandler{}).Action("ListUserBounties"),
+			),
 		),
 	)
 }
