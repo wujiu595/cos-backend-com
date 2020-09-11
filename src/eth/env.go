@@ -2,8 +2,8 @@ package eth
 
 import (
 	"cos-backend-com/src/common/proto"
-
 	"cos-backend-com/src/common/providers/session"
+	libsProto "cos-backend-com/src/libs/proto"
 )
 
 var (
@@ -19,7 +19,7 @@ type Config struct {
 	Session session.SessionConfig `conf:"session"`
 
 	// 内部服务
-	Service proto.ServiceEndpoint `conf:"service"`
+	Service libsProto.ServiceEndpoint `conf:"service"`
 
 	EthClient struct {
 		EndPoint  string `conf:"end_point"`

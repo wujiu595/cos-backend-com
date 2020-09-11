@@ -1,10 +1,7 @@
 package pagination
 
 const (
-	maxOffset     = 10000000
-	maxLimit      = 1000
-	defaultLimit  = 20
-	defaultOffset = 0
+	defaultLimit = 20
 )
 
 type ListRequest struct {

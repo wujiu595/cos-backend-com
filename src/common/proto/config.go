@@ -7,14 +7,6 @@ type CommonEnvConfig struct {
 	Redis     RedisConfig `conf:"redis"`
 }
 
-type ServiceEndpoint struct {
-	Account      string `conf:"account"`
-	Cores        string `conf:"cores"`
-	Notification string `conf:"notification"`
-	Eth          string `conf:"eth"`
-	Web3         string `conf:"web3"`
-}
-
 type PGConfig struct {
 	Master  string `conf:"master"`
 	MaxOpen int    `conf:"max_open"`

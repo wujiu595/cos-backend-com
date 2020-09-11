@@ -114,10 +114,8 @@ func (p *appConfig) ConfigRoutes() {
 			s.Router("/prepareId",
 				s.Get(startups.StartUpsHandler{}).Action("GetPrepareId"),
 			),
-
 			s.Router("/:id",
 				s.Put(startups.StartUpsHandler{}).Action("Update"),
-				s.Get(startups.StartUpsHandler{}).Action("Get"),
 				s.Router("/settings",
 					s.Put(startups.StartUpSettingsHandler{}).Action("Update"),
 				),
@@ -197,6 +195,9 @@ func (p *appConfig) ConfigRoutes() {
 				//s.Router("/:startWork",
 				//	s.Get(bounties.BountiesHandler{}).Action("StartWork"),
 				//),
+			),
+			s.Router("/users/:userId",
+				s.Get(bounties.BountiesHandler{}).Action("ListUserBounties"),
 			),
 		),
 	)
