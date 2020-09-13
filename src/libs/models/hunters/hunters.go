@@ -17,22 +17,6 @@ type hunters struct {
 	dbconn.Connector
 }
 
-func (c *hunters) Get(ctx context.Context, id flake.ID, output interface{}) (err error) {
-	stmt := `
-		WITH res AS (
-			SELECT *
-			FROM hunters
-			WHERE id = ${id}
-		)SELECT row_to_json(r) FROM res r;
-	`
-	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{id}": id,
-	})
-	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
-		return db.GetContext(ctx, &util.PgJsonScanWrap{&output}, query, args...)
-	})
-}
-
 func (c *hunters) Upsert(ctx context.Context, uid flake.ID, input *accountSdk.UpdateHunterInput) (err error) {
 	stmt := `
 		INSERT INTO hunters(user_id, name, skills, about, description_addr, email)
