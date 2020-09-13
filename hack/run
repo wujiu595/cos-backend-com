@@ -26,23 +26,34 @@ function compile() {
 function start(){
     export RUN_MODE=${RUN_MODE:-dev}
     name=$1
-    dir=$(echo ${BDIR}/src/*/cmd/${name})
-    mainfile=$(echo $dir/*.go)
-    [[ $dir == *'*'* ]] && show_help "not found service path ${dir}"
-    [[ $mainfile == *'*'* ]] && show_help "not found main package file ${mainfile}"
     case "${name}" in
-        collector)
-            args=""
-            for i in "${@:2}"; do
-                args=$args" -arg=$i"
-            done
-            watch_run -app=${name} run -main=${mainfile} -out=hack/build/${name} -dir=${dir}/../.. -dir=${dir}/../../../libs $args
+        web3.windows)
+            HTTP_PORT=5000 ./hack/web3/web3-win.exe
+            ;;
+        web3.mac)
+            HTTP_PORT=5000 ./hack/web3/web3-macos
+            ;;
+        web3.linux)
+            HTTP_PORT=5000 ./hack/web3/web3-linux
             ;;
         *)
-            watch_run -app=${name} run -main=${mainfile} -out=hack/build/${name} -dir=${dir}/../.. -dir=${dir}/../../../libs -arg="-conf=hack/conf"
-            ;;
+            dir=$(echo ${BDIR}/src/*/cmd/${name})
+            mainfile=$(echo $dir/*.go)
+            [[ $dir == *'*'* ]] && show_help "not found service path ${dir}"
+            [[ $mainfile == *'*'* ]] && show_help "not found main package file ${mainfile}"
+            case "${name}" in
+                collector)
+                    args=""
+                    for i in "${@:2}"; do
+                        args=$args" -arg=$i"
+                    done
+                    watch_run -app=${name} run -main=${mainfile} -out=hack/build/${name} -dir=${dir}/../.. -dir=${dir}/../../../libs $args
+                    ;;
+                *)
+                    watch_run -app=${name} run -main=${mainfile} -out=hack/build/${name} -dir=${dir}/../.. -dir=${dir}/../../../libs -arg="-conf=hack/conf"
+                    ;;
+            esac
     esac
-
 }
 
 function database(){

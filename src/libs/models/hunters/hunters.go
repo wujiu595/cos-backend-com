@@ -6,7 +6,7 @@ import (
 	"cos-backend-com/src/common/flake"
 	"cos-backend-com/src/common/util"
 	"cos-backend-com/src/libs/models"
-	coresSdk "cos-backend-com/src/libs/sdk/cores"
+	accountSdk "cos-backend-com/src/libs/sdk/account"
 )
 
 var Hunters = &hunters{
@@ -33,13 +33,13 @@ func (c *hunters) Get(ctx context.Context, id flake.ID, output interface{}) (err
 	})
 }
 
-func (c *hunters) Update(ctx context.Context, uid flake.ID, input *coresSdk.UpdateHunterInput) (err error) {
+func (c *hunters) Upsert(ctx context.Context, uid flake.ID, input *accountSdk.UpdateHunterInput) (err error) {
 	stmt := `
 		INSERT INTO hunters(user_id, name, skills, about, description_addr, email)
 		VALUES (
 		    ${userId}, ${name}, ARRAY [${skills}], ${about}, ${descriptionAddr}, ${email}
 		)
-		ON CONFLICT DO
+		ON CONFLICT(user_id) DO
 		UPDATE SET (
 		    name, skills, about, description_addr, email
 		) = (

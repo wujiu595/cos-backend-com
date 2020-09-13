@@ -35,16 +35,19 @@ type users struct {
 
 func (p *users) Get(ctx context.Context, id flake.ID, output interface{}) (err error) {
 	stmt := `
-		SELECT *
-		FROM users
-		WHERE id = ${id};
+		WITH res AS (
+		    SELECT u.*,row_to_json(h.*) as hunter
+		    FROM users u
+		        LEFT JOIN hunters h ON u.id = h.user_id
+		    WHERE u.id = ${id}
+        )SELECT row_to_json(r.*) FROM res r;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{id}": id,
 	})
 
 	return p.Invoke(ctx, func(db dbconn.Q) error {
-		return db.GetContext(ctx, output, query, args...)
+		return db.GetContext(ctx, &util.PgJsonScanWrap{output}, query, args...)
 	})
 }
 
