@@ -9,6 +9,7 @@ import (
 	"cos-backend-com/src/libs/models/ethmodels"
 	coresSdk "cos-backend-com/src/libs/sdk/cores"
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -441,15 +442,16 @@ func (c *startups) NextId(ctx context.Context) (netxtId flake.ID, err error) {
 	return
 }
 
-func (c *startups) Exists(ctx context.Context, uid, id flake.ID) (exists bool, err error) {
-	stmt := "SELECT EXISTS(SELECT 1 FROM startups WHERE uid = ${uid} AND id = ${id})"
+func (c *startups) HasFollowed(ctx context.Context, uid, startupId flake.ID, output interface{}) (err error) {
+	stmt := "SELECT EXISTS(SELECT 1 FROM startups_follows_rel WHERE user_id = ${uid} AND startup_id= ${startupId}) AS has_followed"
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{id}":           id,
-		"{enterpriseId}": uid,
+		"{uid}":       uid,
+		"{startupId}": startupId,
 	})
 	err = c.Invoke(ctx, func(db dbconn.Q) error {
-		return db.GetContext(ctx, &exists, query, args...)
+		return db.GetContext(ctx, output, query, args...)
 	})
+	fmt.Println(output)
 	return
 }
