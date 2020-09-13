@@ -154,14 +154,7 @@ func (p *appConfig) ConfigRoutes() {
 
 		s.Router("/hunters",
 			s.Filter(filters.LoginRequiredInner),
-			s.Post(hunters.HuntersHandler{}).Action("Create"),
 			s.Put(hunters.HuntersHandler{}).Action("Update"),
-			s.Router("/:id",
-				s.Get(hunters.HuntersHandler{}).Action("Get"),
-			),
-			s.Router("/me",
-				s.Get(hunters.HuntersHandler{}).Action("GetMe"),
-			),
 		),
 
 		s.Router("/files",

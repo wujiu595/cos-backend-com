@@ -28,44 +28,6 @@ func (h *HuntersHandler) Get(id flake.ID) (res interface{}) {
 	return
 }
 
-func (h *HuntersHandler) GetMe() (res interface{}) {
-	var output cores.HunterResult
-	var uid flake.ID
-	h.Ctx.Find(&uid, "uid")
-	if err := huntersModels.Hunters.GetMe(h.Ctx, uid, &output); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
-	}
-
-	res = apires.With(&output, http.StatusOK)
-	return
-}
-
-func (h *HuntersHandler) Create() (res interface{}) {
-	var input cores.CreateHunterInput
-	if err := h.Params.BindJsonBody(&input); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
-	}
-	if err := validate.Default.Struct(input); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
-	}
-	var uid flake.ID
-	h.Ctx.Find(&uid, "uid")
-	if err := huntersModels.Hunters.Create(h.Ctx, uid, &input); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
-	}
-
-	res = apires.Ret(http.StatusOK)
-	return
-}
-
 func (h *HuntersHandler) Update() (res interface{}) {
 	var input cores.UpdateHunterInput
 	if err := h.Params.BindJsonBody(&input); err != nil {
