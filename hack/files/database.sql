@@ -278,6 +278,19 @@ CREATE TABLE comunion.startups (
 
 
 --
+-- Name: startups_follows_rel; Type: TABLE; Schema: comunion; Owner: -
+--
+
+CREATE TABLE comunion.startups_follows_rel (
+    id bigint DEFAULT comunion.id_generator() NOT NULL,
+    startup_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: tags; Type: TABLE; Schema: comunion; Owner: -
 --
 
@@ -396,6 +409,14 @@ ALTER TABLE ONLY comunion.startup_settings
 
 
 --
+-- Name: startups_follows_rel startups_follows_rel_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
+--
+
+ALTER TABLE ONLY comunion.startups_follows_rel
+    ADD CONSTRAINT startups_follows_rel_pk PRIMARY KEY (id);
+
+
+--
 -- Name: startups startups_id_pk; Type: CONSTRAINT; Schema: comunion; Owner: -
 --
 
@@ -495,6 +516,13 @@ CREATE INDEX startup_setting_revisions_startup_setting_id_idx ON comunion.startu
 --
 
 CREATE UNIQUE INDEX startup_settings_startup_id ON comunion.startup_settings USING btree (startup_id);
+
+
+--
+-- Name: startups_follows_rel_startup_id_user_id; Type: INDEX; Schema: comunion; Owner: -
+--
+
+CREATE UNIQUE INDEX startups_follows_rel_startup_id_user_id ON comunion.startups_follows_rel USING btree (startup_id, user_id);
 
 
 --
