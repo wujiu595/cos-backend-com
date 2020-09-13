@@ -35,8 +35,8 @@ type LoginInput struct {
 }
 
 type UserResult struct {
-	Id        flake.ID `json:"id" db:"id"`                // id (PK)
-	PublicKey string   `json:"publicKey" db:"public_key"` // wallet_addr
-	Avatar    string   `json:"avatar" db:"avatar"`        // avatar
-	IsHunter  bool     `json:"isHunter" db:"is_hunter"`   // is_hunter
+	Id        flake.ID      `json:"id" db:"id"`                // id (PK)
+	PublicKey string        `json:"publicKey" db:"public_key"` // wallet_addr
+	Avatar    string        `json:"avatar" db:"avatar"`        // avatar
+	Hunter    *HunterResult `json:"hunter" db:"hunter"`        //hunter
 }
