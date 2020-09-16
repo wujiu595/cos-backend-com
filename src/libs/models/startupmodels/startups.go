@@ -89,6 +89,15 @@ func (c *startups) List(ctx context.Context, input *coresSdk.ListStartupsInput, 
 }
 
 func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.ListStartupsInput, outputs interface{}) (total int, err error) {
+	filterStmt := ``
+	if input.IsInBlock != nil {
+		if *input.IsInBlock {
+			filterStmt += `AND t1.state = ${transactionStateSuccess}`
+		}
+		if *input.IsInBlock {
+			filterStmt += `AND t1.state != ${transactionStateSuccess}`
+		}
+	}
 	stmt := `
 		WITH res AS(
 			SELECT
@@ -108,6 +117,7 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 			    LEFT JOIN startup_setting_revisions ssr ON ss.confirming_revision_id = ssr.id
 			    LEFT JOIN transactions t2 ON t2.source_id = ssr.id AND t2.source = ${sourceStartupSetting}
 			WHERE s.uid = ${uid}
+				` + filterStmt + `
 			ORDER BY s.created_at DESC
 			LIMIT ${limit} OFFSET ${offset}
 		)
@@ -120,15 +130,17 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 		    INNER JOIN startup_revisions sr ON s.confirming_revision_id = sr.id
 		    INNER JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup}
 		    INNER JOIN categories c ON c.id = sr.category_id
-		WHERE s.uid = ${uid};
+		WHERE s.uid = ${uid}
+			` + filterStmt + `;
 	`
 
 	query, args := util.PgMapQuery(countStmt, map[string]interface{}{
-		"{uid}":                  uid,
-		"{categoryId}":           input.CategoryId,
-		"{isIRO}":                input.IsIRO,
-		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
-		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
+		"{uid}":                     uid,
+		"{categoryId}":              input.CategoryId,
+		"{isIRO}":                   input.IsIRO,
+		"{sourceStartup}":           ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}":    ethSdk.TransactionSourceStartupSetting,
+		"{transactionStateSuccess}": ethSdk.TransactionStateSuccess,
 	})
 
 	if err = c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
@@ -137,13 +149,14 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 		return
 	}
 	query, args = util.PgMapQuery(stmt, map[string]interface{}{
-		"{uid}":                  uid,
-		"{categoryId}":           input.CategoryId,
-		"{isIRO}":                input.IsIRO,
-		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
-		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
-		"{offset}":               input.Offset,
-		"{limit}":                input.GetLimit(),
+		"{uid}":                     uid,
+		"{categoryId}":              input.CategoryId,
+		"{isIRO}":                   input.IsIRO,
+		"{sourceStartup}":           ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}":    ethSdk.TransactionSourceStartupSetting,
+		"{transactionStateSuccess}": ethSdk.TransactionStateSuccess,
+		"{offset}":                  input.Offset,
+		"{limit}":                   input.GetLimit(),
 	})
 	return total, c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
 		return db.GetContext(ctx, &util.PgJsonScanWrap{outputs}, query, args...)

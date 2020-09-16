@@ -45,6 +45,7 @@ type ListStartupsInput struct {
 	CategoryId flake.ID `param:"categoryId"`
 	IsIRO      bool     `param:"isIRo"`
 	Keyword    string   `param:"keyword"`
+	IsInBlock  *bool    `param:"isInBlock"`
 	pagination.ListRequest
 }
 
