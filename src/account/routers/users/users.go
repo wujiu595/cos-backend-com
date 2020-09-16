@@ -39,13 +39,6 @@ func (h *Users) Me() (res interface{}) {
 }
 
 func (h *Users) Get(uid flake.ID) (res interface{}) {
-	var input account.LoginInput
-	if err := h.Params.BindJsonBody(&input); err != nil {
-		h.Log.Warn(err)
-		res = apierror.ErrBadRequest.WithData(err)
-		return
-	}
-
 	var user account.UserResult
 	if err := usermodels.Users.Get(h.Ctx, uid, &user); err != nil {
 		h.Log.Warn(err)
