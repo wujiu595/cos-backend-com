@@ -87,6 +87,19 @@ func (h *StartUpsHandler) ListMeFollowed() (res interface{}) {
 	return
 }
 
+func (h *StartUpsHandler) HasFollowed(startupId flake.ID) (res interface{}) {
+	var uid flake.ID
+	h.Ctx.Find(&uid, "uid")
+	var output cores.HasFollowedStartupResult
+	if err := startupmodels.Startups.HasFollowed(h.Ctx, uid, startupId, &output.HasFollowed); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+	res = apires.With(&output, http.StatusOK)
+	return
+}
+
 func (h *StartUpsHandler) Create() (res interface{}) {
 	var input cores.CreateStartupInput
 	if err := h.Params.BindJsonBody(&input); err != nil {

@@ -9,6 +9,7 @@ import (
 	"cos-backend-com/src/libs/models/ethmodels"
 	coresSdk "cos-backend-com/src/libs/sdk/cores"
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -88,6 +89,15 @@ func (c *startups) List(ctx context.Context, input *coresSdk.ListStartupsInput, 
 }
 
 func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.ListStartupsInput, outputs interface{}) (total int, err error) {
+	filterStmt := ``
+	if input.IsInBlock != nil {
+		if *input.IsInBlock {
+			filterStmt += `AND t1.state = ${transactionStateSuccess}`
+		}
+		if *input.IsInBlock {
+			filterStmt += `AND t1.state != ${transactionStateSuccess}`
+		}
+	}
 	stmt := `
 		WITH res AS(
 			SELECT
@@ -107,6 +117,7 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 			    LEFT JOIN startup_setting_revisions ssr ON ss.confirming_revision_id = ssr.id
 			    LEFT JOIN transactions t2 ON t2.source_id = ssr.id AND t2.source = ${sourceStartupSetting}
 			WHERE s.uid = ${uid}
+				` + filterStmt + `
 			ORDER BY s.created_at DESC
 			LIMIT ${limit} OFFSET ${offset}
 		)
@@ -119,15 +130,17 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 		    INNER JOIN startup_revisions sr ON s.confirming_revision_id = sr.id
 		    INNER JOIN transactions t1 ON t1.source_id = sr.id AND t1.source = ${sourceStartup}
 		    INNER JOIN categories c ON c.id = sr.category_id
-		WHERE s.uid = ${uid};
+		WHERE s.uid = ${uid}
+			` + filterStmt + `;
 	`
 
 	query, args := util.PgMapQuery(countStmt, map[string]interface{}{
-		"{uid}":                  uid,
-		"{categoryId}":           input.CategoryId,
-		"{isIRO}":                input.IsIRO,
-		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
-		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
+		"{uid}":                     uid,
+		"{categoryId}":              input.CategoryId,
+		"{isIRO}":                   input.IsIRO,
+		"{sourceStartup}":           ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}":    ethSdk.TransactionSourceStartupSetting,
+		"{transactionStateSuccess}": ethSdk.TransactionStateSuccess,
 	})
 
 	if err = c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
@@ -136,13 +149,14 @@ func (c *startups) ListMe(ctx context.Context, uid flake.ID, input *coresSdk.Lis
 		return
 	}
 	query, args = util.PgMapQuery(stmt, map[string]interface{}{
-		"{uid}":                  uid,
-		"{categoryId}":           input.CategoryId,
-		"{isIRO}":                input.IsIRO,
-		"{sourceStartup}":        ethSdk.TransactionSourceStartup,
-		"{sourceStartupSetting}": ethSdk.TransactionSourceStartupSetting,
-		"{offset}":               input.Offset,
-		"{limit}":                input.GetLimit(),
+		"{uid}":                     uid,
+		"{categoryId}":              input.CategoryId,
+		"{isIRO}":                   input.IsIRO,
+		"{sourceStartup}":           ethSdk.TransactionSourceStartup,
+		"{sourceStartupSetting}":    ethSdk.TransactionSourceStartupSetting,
+		"{transactionStateSuccess}": ethSdk.TransactionStateSuccess,
+		"{offset}":                  input.Offset,
+		"{limit}":                   input.GetLimit(),
 	})
 	return total, c.Invoke(ctx, func(db *sqlx.Tx) (er error) {
 		return db.GetContext(ctx, &util.PgJsonScanWrap{outputs}, query, args...)
@@ -441,15 +455,16 @@ func (c *startups) NextId(ctx context.Context) (netxtId flake.ID, err error) {
 	return
 }
 
-func (c *startups) Exists(ctx context.Context, uid, id flake.ID) (exists bool, err error) {
-	stmt := "SELECT EXISTS(SELECT 1 FROM startups WHERE uid = ${uid} AND id = ${id})"
+func (c *startups) HasFollowed(ctx context.Context, uid, startupId flake.ID, output interface{}) (err error) {
+	stmt := "SELECT EXISTS(SELECT 1 FROM startups_follows_rel WHERE user_id = ${uid} AND startup_id= ${startupId}) AS has_followed"
 
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{id}":           id,
-		"{enterpriseId}": uid,
+		"{uid}":       uid,
+		"{startupId}": startupId,
 	})
 	err = c.Invoke(ctx, func(db dbconn.Q) error {
-		return db.GetContext(ctx, &exists, query, args...)
+		return db.GetContext(ctx, output, query, args...)
 	})
+	fmt.Println(output)
 	return
 }

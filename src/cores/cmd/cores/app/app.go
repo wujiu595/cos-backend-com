@@ -9,7 +9,6 @@ import (
 	"cos-backend-com/src/cores/routers/categories"
 	"cos-backend-com/src/cores/routers/files"
 	"cos-backend-com/src/cores/routers/follows"
-	"cos-backend-com/src/cores/routers/hunters"
 	"cos-backend-com/src/cores/routers/startups"
 	"cos-backend-com/src/cores/routers/tags"
 	"cos-backend-com/src/libs/auth"
@@ -114,10 +113,11 @@ func (p *appConfig) ConfigRoutes() {
 			s.Router("/prepareId",
 				s.Get(startups.StartUpsHandler{}).Action("GetPrepareId"),
 			),
-
 			s.Router("/:id",
 				s.Put(startups.StartUpsHandler{}).Action("Update"),
-				s.Get(startups.StartUpsHandler{}).Action("Get"),
+				s.Router("/hasFollowed",
+					s.Get(startups.StartUpsHandler{}).Action("HasFollowed"),
+				),
 				s.Router("/settings",
 					s.Put(startups.StartUpSettingsHandler{}).Action("Update"),
 				),
@@ -146,24 +146,6 @@ func (p *appConfig) ConfigRoutes() {
 
 		s.Router("/tags",
 			s.Get(tags.TagsHandler{}).Action("List"),
-		),
-
-		s.Router("/hunters",
-			s.Router("/:id",
-				s.Get(hunters.HuntersHandler{}).Action("Get"),
-			),
-		),
-
-		s.Router("/hunters",
-			s.Filter(filters.LoginRequiredInner),
-			s.Post(hunters.HuntersHandler{}).Action("Create"),
-			s.Put(hunters.HuntersHandler{}).Action("Update"),
-			s.Router("/:id",
-				s.Get(hunters.HuntersHandler{}).Action("Get"),
-			),
-			s.Router("/me",
-				s.Get(hunters.HuntersHandler{}).Action("GetMe"),
-			),
 		),
 
 		s.Router("/files",
@@ -197,6 +179,9 @@ func (p *appConfig) ConfigRoutes() {
 				//s.Router("/:startWork",
 				//	s.Get(bounties.BountiesHandler{}).Action("StartWork"),
 				//),
+			),
+			s.Router("/users/:userId",
+				s.Get(bounties.BountiesHandler{}).Action("ListUserBounties"),
 			),
 		),
 	)

@@ -59,13 +59,15 @@ func (h *Guest) Login() (res interface{}) {
 		res = apierror.HandleError(err)
 		return
 	}
+	var userOutput account.UserResult
 
-	res = apires.With(account.UserResult{
-		Id:        user.Id,
-		Avatar:    user.Avatar,
-		PublicKey: user.PublicKey,
-		IsHunter:  user.IsHunter,
-	})
+	if err := usermodels.Users.Get(h.Ctx, user.Id, &userOutput); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&userOutput)
 	return
 }
 

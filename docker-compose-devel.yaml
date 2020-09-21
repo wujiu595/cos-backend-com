@@ -1,16 +1,6 @@
 version: "3"
 
 services:
-  nats:
-    image: nats-streaming:latest
-    container_name: nats-stream
-    ports:
-      - 4222:4222
-      - 8222:8222
-    command:
-      - "-cid"
-      - "test-cid"
-
   redis:
     image: redis:alpine
     container_name: redis

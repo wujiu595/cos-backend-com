@@ -45,6 +45,7 @@ type ListStartupsInput struct {
 	CategoryId flake.ID `param:"categoryId"`
 	IsIRO      bool     `param:"isIRo"`
 	Keyword    string   `param:"keyword"`
+	IsInBlock  *bool    `param:"isInBlock"`
 	pagination.ListRequest
 }
 
@@ -75,4 +76,8 @@ type ListStartupsResult struct {
 		BountyCount     int              `json:"bountyCount" db:"bounty_count"`
 		FollowCount     int              `json:"followCount" db:"follow_count"`
 	} `json:"result"`
+}
+
+type HasFollowedStartupResult struct {
+	HasFollowed bool `json:"hasFollowed" db:"has_followed"`
 }
