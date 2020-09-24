@@ -187,13 +187,13 @@ func (c *bounties) GetBounty(ctx context.Context, id flake.ID, isOwner bool, out
 	return
 }
 
-func (c *bounties) CreateUndertakeBounty(ctx context.Context, bountyId flake.ID, uid flake.ID, txId string, output *coresSdk.UndertakeBountyResult) (err error) {
+func (c *bounties) CreateUndertakeBounty(ctx context.Context, uid flake.ID, input *coresSdk.CreateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
 	stmt := `
 		INSERT INTO bounties_hunters_rel(bounty_id, uid, status, started_at)
-		VALUES (${bountyId}, ${uid}, ${status}, ${startedAt}) RETURNING id;
+		VALUES (${uid}, ${status}, ${startedAt}) RETURNING id;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{bountyId}":  bountyId,
+		"{bountyId}":  input.BountyId,
 		"{uid}":       uid,
 		"{status}":    coresSdk.UndertakeBountyStatusNull,
 		"{startedAt}": time.Now(),
@@ -205,9 +205,9 @@ func (c *bounties) CreateUndertakeBounty(ctx context.Context, bountyId flake.ID,
 			return er
 		}
 		createTransactionsInput := ethSdk.CreateTransactionsInput{
-			TxId:     txId,
+			TxId:     input.TxId,
 			Source:   ethSdk.TransactionSourceUndertakeBounty,
-			SourceId: (*output).Id,
+			SourceId: output.Id,
 		}
 
 		return ethmodels.Transactions.Create(newCtx, &createTransactionsInput)

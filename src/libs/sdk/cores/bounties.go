@@ -101,6 +101,11 @@ type ListBountiesResult struct {
 	Result []BountyOutput `json:"result"`
 }
 
+type CreateUndertakeBountyInput struct {
+	BountyId flake.ID `json:"bountyId" validate:"required"`
+	TxId     string   `json:"txId" validate:"required"`
+}
+
 type UndertakeBountyResult struct {
 	Id       flake.ID              `json:"id" db:"id"`
 	BountyId flake.ID              `json:"bountyId" db:"bounty_id"`
