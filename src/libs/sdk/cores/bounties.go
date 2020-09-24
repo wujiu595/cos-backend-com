@@ -35,10 +35,11 @@ func (b BountyType) Validate() bool {
 type BountyHunterRelStatus int
 
 const (
-	BountyStatusStartWork BountyHunterRelStatus = iota
-	BountyStatusSubmitted BountyHunterRelStatus = iota
-	BountyStatusPaid      BountyHunterRelStatus = iota
-	BountyStatusQuited    BountyHunterRelStatus = iota
+	UndertakeBountyStatusNull      BountyHunterRelStatus = 0
+	UndertakeBountyStatusStartWork BountyHunterRelStatus = 1
+	UndertakeBountyStatusSubmitted BountyHunterRelStatus = 99
+	UndertakeBountyStatusPaid      BountyHunterRelStatus = 100
+	UndertakeBountyStatusQuited    BountyHunterRelStatus = 101
 )
 
 type CreateBountyInput struct {
@@ -98,4 +99,11 @@ type ListBountiesInput struct {
 type ListBountiesResult struct {
 	pagination.ListResult
 	Result []BountyOutput `json:"result"`
+}
+
+type UndertakeBountyResult struct {
+	Id       flake.ID              `json:"id" db:"id"`
+	BountyId flake.ID              `json:"bountyId" db:"bounty_id"`
+	UserId   flake.ID              `json:"userId" db:"uid"`
+	Status   BountyHunterRelStatus `json:"status" db:"status"`
 }
