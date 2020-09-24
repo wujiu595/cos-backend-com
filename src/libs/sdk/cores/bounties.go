@@ -109,6 +109,5 @@ type CreateUndertakeBountyInput struct {
 type UndertakeBountyResult struct {
 	Id       flake.ID              `json:"id" db:"id"`
 	BountyId flake.ID              `json:"bountyId" db:"bounty_id"`
-	UserId   flake.ID              `json:"userId" db:"uid"`
 	Status   BountyHunterRelStatus `json:"status" db:"status"`
 }
