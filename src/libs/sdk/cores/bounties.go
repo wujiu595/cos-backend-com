@@ -35,11 +35,11 @@ func (b BountyType) Validate() bool {
 type BountyHunterRelStatus int
 
 const (
-	UndertakeBountyStatusNull      BountyHunterRelStatus = 0
-	UndertakeBountyStatusStartWork BountyHunterRelStatus = 1
-	UndertakeBountyStatusSubmitted BountyHunterRelStatus = 99
-	UndertakeBountyStatusPaid      BountyHunterRelStatus = 100
-	UndertakeBountyStatusQuited    BountyHunterRelStatus = 101
+	UndertakeBountyStatusNull      BountyHunterRelStatus = iota
+	UndertakeBountyStatusStartWork BountyHunterRelStatus = iota
+	UndertakeBountyStatusSubmitted BountyHunterRelStatus = iota
+	UndertakeBountyStatusPaid      BountyHunterRelStatus = iota
+	UndertakeBountyStatusQuited    BountyHunterRelStatus = iota
 )
 
 type CreateBountyInput struct {
