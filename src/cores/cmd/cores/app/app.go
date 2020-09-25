@@ -179,7 +179,7 @@ func (p *appConfig) ConfigRoutes() {
 			),
 			s.Router("/:id:startWork",
 				s.Filter(filters.LoginRequiredInner),
-				s.Post(bounties.UndertakeBountiesHandler{}).Action("StartWork"),
+				s.Post(bounties.BountiesHandler{}).Action("StartWork"),
 			),
 			s.Router("/users/:userId",
 				s.Get(bounties.BountiesHandler{}).Action("ListUserBounties"),
