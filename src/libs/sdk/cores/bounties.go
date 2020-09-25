@@ -111,7 +111,3 @@ type UndertakeBountyResult struct {
 	BountyId flake.ID              `json:"bountyId" db:"bounty_id"`
 	Status   BountyHunterRelStatus `json:"status" db:"status"`
 }
-
-type UndertakeBountyStatusResult struct {
-	Status BountyHunterRelStatus `json:"status" db:"status"`
-}
