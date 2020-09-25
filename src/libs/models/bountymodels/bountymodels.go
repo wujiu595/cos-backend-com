@@ -34,7 +34,7 @@ func (c *bounties) CreateBounty(ctx context.Context, startupId, uid flake.ID, in
 			${descriptionFileAddr}, ${duration}, ${expiredAt}, ${payments});
 	`
 
-	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+	query, args := util.PgMapQueryV2(stmt, map[string]interface{}{
 		"{id}":                  input.Id,
 		"{startupId}":           startupId,
 		"{userId}":              uid,
