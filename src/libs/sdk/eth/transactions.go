@@ -24,9 +24,10 @@ func (t TransactionState) Validate() bool {
 type TransactionSource string
 
 const (
-	TransactionSourceStartup        TransactionSource = "startup"
-	TransactionSourceBounty         TransactionSource = "bounty"
-	TransactionSourceStartupSetting TransactionSource = "startupSetting"
+	TransactionSourceStartup         TransactionSource = "startup"
+	TransactionSourceBounty          TransactionSource = "bounty"
+	TransactionSourceStartupSetting  TransactionSource = "startupSetting"
+	TransactionSourceUndertakeBounty TransactionSource = "undertakeBounty"
 )
 
 func (t TransactionSource) Validate() bool {
