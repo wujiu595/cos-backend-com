@@ -186,30 +186,3 @@ func (h *BountiesHandler) Create(startupId flake.ID) (res interface{}) {
 	}, http.StatusOK)
 	return
 }
-
-func (h *BountiesHandler) StartWork(bountyId flake.ID) (res interface{}) {
-	var input cores.CreateUndertakeBountyInput
-	input.BountyId = bountyId
-	if err := h.Params.BindJsonBody(&input); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
-	}
-	if err := validate.Default.Struct(input); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
-	}
-
-	var uid flake.ID
-	h.Ctx.Find(&uid, "uid")
-	var output cores.UndertakeBountyResult
-	if err := bountymodels.Bounties.CreateUndertakeBounty(h.Ctx, uid, &input, &output); err != nil {
-		h.Log.Warn(err)
-		res = apierror.HandleError(err)
-		return
-	}
-
-	res = apires.With(&output, http.StatusOK)
-	return
-}
