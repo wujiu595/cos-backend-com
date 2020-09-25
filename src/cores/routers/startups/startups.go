@@ -205,3 +205,9 @@ func (h *StartUpsHandler) Restore(id flake.ID) (res interface{}) {
 	res = apires.With(http.StatusOK)
 	return
 }
+
+func (h *StartUpsHandler) GetPayTokens(id flake.ID) (res interface{}) {
+
+	res = apires.With(cores.AvailableTokens("uvu", "uvu"), http.StatusOK)
+	return
+}

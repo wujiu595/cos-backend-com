@@ -121,6 +121,9 @@ func (p *appConfig) ConfigRoutes() {
 				s.Router("/settings",
 					s.Put(startups.StartUpSettingsHandler{}).Action("Update"),
 				),
+				s.Router("/payTokens",
+					s.Get(startups.StartUpSettingsHandler{}).Action("GetPayTokens"),
+				),
 			),
 			//restore startup
 			s.Router("/:id:restore",
