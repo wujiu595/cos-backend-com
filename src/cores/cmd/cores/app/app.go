@@ -122,7 +122,7 @@ func (p *appConfig) ConfigRoutes() {
 					s.Put(startups.StartUpSettingsHandler{}).Action("Update"),
 				),
 				s.Router("/payTokens",
-					s.Get(startups.StartUpSettingsHandler{}).Action("GetPayTokens"),
+					s.Get(startups.StartUpsHandler{}).Action("GetPayTokens"),
 				),
 			),
 			//restore startup

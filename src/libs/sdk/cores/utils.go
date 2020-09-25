@@ -9,17 +9,21 @@ type PrepareIdOutput struct {
 }
 
 type Token struct {
-	name   string
-	symbol string
+	Name   string `json:"name" db:"name"`
+	Symbol string `json:"symbol" db:"symbol"`
 }
 
-func AvailableTokens(name string, symbol string) []Token {
+type PayTokenListOutput struct {
+	PayTokens []Token `json:"payTokens"`
+}
+
+func AvailableTokens(name string, symbol string) PayTokenListOutput {
 	var arrTokens []Token = []Token{
 		Token{"ETH", "ETH"},
 		Token{"BTC", "BTC"},
 		Token{"USDT", "USDT"},
 	}
 	arrTokens = append(arrTokens, Token{name, symbol})
-
-	return arrTokens
+	var payTokens PayTokenListOutput = PayTokenListOutput{arrTokens}
+	return payTokens
 }
