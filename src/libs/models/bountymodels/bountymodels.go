@@ -74,7 +74,7 @@ func (c *bounties) ListBounties(ctx context.Context, startupId, uid flake.ID, is
 	filterStmt := ""
 	keyword := ""
 	if input.Keyword != "" {
-		input.Keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
+		keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
 		filterStmt += `AND b.name ILIKE ${keyword}`
 	}
 
