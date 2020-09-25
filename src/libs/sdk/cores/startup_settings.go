@@ -19,7 +19,7 @@ type UpdateStartupSettingInput struct {
 		Name string `json:"name"`
 		Addr string `json:"addr"`
 	} `json:"walletAddrs"`
-	Type                   string   `json:"type"`
+	VoteType               string   `json:"voteType"`
 	VoteTokenLimit         int64    `json:"voteTokenLimit"`
 	VoteAssignAddrs        []string `json:"voteAssignAddrs"`
 	VoteSupportPercent     int      `json:"voteSupportPercent"`
