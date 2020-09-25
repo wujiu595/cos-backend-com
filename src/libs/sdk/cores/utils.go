@@ -9,8 +9,8 @@ type PrepareIdOutput struct {
 }
 
 type Token struct {
-	Name   string `json:"name" db:"name"`
-	Symbol string `json:"symbol" db:"symbol"`
+	Name   string `json:"name" db:"token_name"`
+	Symbol string `json:"symbol" db:"token_symbol"`
 }
 
 type PayTokenListOutput struct {

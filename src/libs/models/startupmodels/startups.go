@@ -483,6 +483,5 @@ func (c *startups) GetToken(ctx context.Context, startupId flake.ID, output inte
 	err = c.Invoke(ctx, func(db dbconn.Q) error {
 		return db.GetContext(ctx, output, query, args...)
 	})
-	fmt.Println(output)
 	return
 }

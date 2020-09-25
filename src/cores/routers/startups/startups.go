@@ -207,9 +207,8 @@ func (h *StartUpsHandler) Restore(id flake.ID) (res interface{}) {
 }
 
 func (h *StartUpsHandler) GetPayTokens(id flake.ID) (res interface{}) {
-
 	var output cores.Token
-	if err := startupmodels.Startups.GetToken(h.Ctx, id, output); err != nil {
+	if err := startupmodels.Startups.GetToken(h.Ctx, id, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
