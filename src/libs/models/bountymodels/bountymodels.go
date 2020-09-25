@@ -71,11 +71,10 @@ func (c *bounties) ListBounties(ctx context.Context, startupId, uid flake.ID, is
 	plan := &dbquery.Plan{}
 	plan.RetTotal = true
 
-	filterStmt := ""
 	keyword := ""
 	if input.Keyword != "" {
 		keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
-		filterStmt += `AND b.name ILIKE ${keyword}`
+		plan.AddCond(`AND b.title ILIKE ${keyword}`)
 	}
 
 	if startupId != flake.ID(0) {
@@ -135,7 +134,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 
 	query := `
 	WITH bounties_cte AS (
-		SELECT b.*,t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name) startup
+		SELECT b.*, t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name) startup
 		` + filterSql + `
         ` + joinCondition + `
 		WHERE 1=1 
