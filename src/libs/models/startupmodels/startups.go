@@ -468,3 +468,21 @@ func (c *startups) HasFollowed(ctx context.Context, uid, startupId flake.ID, out
 	fmt.Println(output)
 	return
 }
+
+func (c *startups) GetToken(ctx context.Context, startupId flake.ID, output interface{}) (err error) {
+	stmt := `
+		SELECT ssr.token_name, ssr.token_symbol
+		FROM startup_setting_revisions ssr
+			LEFT JOIN startup_settings ss ON ssr."id" = ss.confirming_revision_id
+		WHERE ss.startup_id = ${startupId}
+	`
+	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+		"{startupId}": startupId,
+	})
+
+	err = c.Invoke(ctx, func(db dbconn.Q) error {
+		return db.GetContext(ctx, output, query, args...)
+	})
+	fmt.Println(output)
+	return
+}
