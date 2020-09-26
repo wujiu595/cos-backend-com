@@ -87,6 +87,8 @@ type BountyOutput struct {
 		PaidTokens  types.JSONText        `json:"paidTokens" db:"paid_tokens"`   // paid_tokens
 	} `json:"hunters" db:"hunters"`
 	Status           BountyStatus         `json:"status" db:"status"`
+	CreatedAt        time.Time            `json:"createdAt" db:"created_at"`
+	ExpiredAt        time.Time            `json:"expiredAt" db:"expired_at"`
 	BlockAddr        string               `json:"blockAddr" db:"block_addr"`
 	TransactionState eth.TransactionState `json:"transactionState" db:"transaction_state"`
 }
