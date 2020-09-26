@@ -65,7 +65,10 @@ type BountyOutput struct {
 		Id   flake.ID `json:"id" db:"id"`
 		Name string   `json:"name" db:"name"`
 	} `json:"startup" db:"startup"`
-	UserId              flake.ID       `json:"userId" db:"user_id"`
+	CreatedBy struct {
+		Id   flake.ID `json:"id" db:"id"`
+		Name string   `json:"name" db:"name"`
+	} `json:"createdBy" db:"created_by"`
 	Title               string         `json:"title" db:"title"`
 	Type                string         `json:"type" db:"type"`
 	Keywords            []string       `json:"keywords" db:"keywords"`
