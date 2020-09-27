@@ -20,12 +20,12 @@ type tags struct {
 // List Categories interface{} by input
 func (c *tags) List(ctx context.Context, input *coresSdk.ListTagsInput, output interface{}) (err error) {
 	stmt := `
-	WITH res AS (
-        SELECT name FROM tags WHERE source = ${source}
-	)
-	SELECT
-		COALESCE(json_build_array(r.name), '[]'::json)
-	FROM res r;
+		WITH res AS (
+    	    SELECT name FROM tags WHERE source = ${source}
+		)
+		SELECT
+			COALESCE(json_agg(r.name), '[]'::json)
+		FROM res r;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{source}": input.Source,

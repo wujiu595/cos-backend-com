@@ -30,7 +30,7 @@ func (c *hunters) Upsert(ctx context.Context, uid flake.ID, input *accountSdk.Up
 		    ${name}, ARRAY [${skills}], ${about},${descriptionAddr}, ${email}
 		);
 	`
-	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+	query, args := util.PgMapQueryV2(stmt, map[string]interface{}{
 		"{userId}":          uid,
 		"{name}":            input.Name,
 		"{skills}":          input.Skills,

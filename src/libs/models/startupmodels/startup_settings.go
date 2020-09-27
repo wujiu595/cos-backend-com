@@ -84,7 +84,7 @@ func (c *startupSettings) CreateRevision(ctx context.Context, startupSettingId f
 		"{tokenSymbol}":            input.TokenSymbol,
 		"{tokenAddr}":              input.TokenAddr,
 		"{walletAddrs}":            types.JSONAny{input.WalletAddrs},
-		"{type}":                   input.Type,
+		"{type}":                   input.VoteType,
 		"{voteTokenLimit}":         input.VoteTokenLimit,
 		"{voteAssignAddrs}":        input.VoteAssignAddrs,
 		"{voteSupportPercent}":     input.VoteSupportPercent,

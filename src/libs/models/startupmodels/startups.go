@@ -29,7 +29,7 @@ func (c *startups) List(ctx context.Context, input *coresSdk.ListStartupsInput, 
 	}
 	var keyword string
 	if input.Keyword != "" {
-		input.Keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
+		keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
 		filterStmt += `AND s.name ILIKE ${keyword}`
 	}
 

@@ -34,7 +34,7 @@ func (c *bounties) CreateBounty(ctx context.Context, startupId, uid flake.ID, in
 			${descriptionFileAddr}, ${duration}, ${expiredAt}, ${payments});
 	`
 
-	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+	query, args := util.PgMapQueryV2(stmt, map[string]interface{}{
 		"{id}":                  input.Id,
 		"{startupId}":           startupId,
 		"{userId}":              uid,
@@ -71,11 +71,10 @@ func (c *bounties) ListBounties(ctx context.Context, startupId, uid flake.ID, is
 	plan := &dbquery.Plan{}
 	plan.RetTotal = true
 
-	filterStmt := ""
 	keyword := ""
 	if input.Keyword != "" {
-		input.Keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
-		filterStmt += `AND b.name ILIKE ${keyword}`
+		keyword = "%" + util.PgEscapeLike(input.Keyword) + "%"
+		plan.AddCond(`AND b.title ILIKE ${keyword}`)
 	}
 
 	if startupId != flake.ID(0) {
@@ -101,6 +100,8 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 	filterSql := `
         FROM bounties b
         INNER JOIN startups s ON s.id = b.startup_id
+		INNER JOIN users u ON b.user_id = u.id
+		LEFT JOIN hunters h ON u.id = h.user_id
 	`
 	joinCondition := ``
 
@@ -135,7 +136,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 
 	query := `
 	WITH bounties_cte AS (
-		SELECT b.*,t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name) startup
+		SELECT b.*, t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name) startup, json_build_object('id',b.user_id,'name',coalesce(h.name,u.public_key),'is_hunter',CASE WHEN h.name IS NOT NULL THEN TRUE ELSE FALSE END) created_by
 		` + filterSql + `
         ` + joinCondition + `
 		WHERE 1=1 
