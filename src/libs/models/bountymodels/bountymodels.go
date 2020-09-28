@@ -100,7 +100,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 	filterSql := `
         FROM bounties b
         INNER JOIN startups s ON s.id = b.startup_id
-        INNER JOIN startup_revisions sr ON startups.id = sr.startup_id
+        INNER JOIN startup_revisions sr ON s.id = sr.startup_id
 		INNER JOIN users u ON b.user_id = u.id
 		LEFT JOIN hunters h ON u.id = h.user_id
 	`
