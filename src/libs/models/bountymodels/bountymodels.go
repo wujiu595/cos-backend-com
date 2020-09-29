@@ -236,13 +236,13 @@ func (c *bounties) UpdateUndertakeBounty(ctx context.Context, input *coresSdk.Up
 	values := ""
 	if input.Status == coresSdk.UndertakeBountyStatusSubmitted {
 		fields += "status, submitted_at, updated_at"
-		values += "${status}, ${submittedAt}, ${updatedAt}"
+		values += "${status}, current_timestamp, current_timestamp"
 	} else if input.Status == coresSdk.UndertakeBountyStatusQuited {
 		fields += "status, quited_at, updated_at"
-		values += "${status}, ${quitedAt}, ${updatedAt}"
+		values += "${status}, current_timestamp, current_timestamp"
 	} else if input.Status == coresSdk.UndertakeBountyStatusPaid {
 		fields += "status, paid_at, updated_at"
-		values += "${status}, ${paidAt}, ${updatedAt}"
+		values += "${status}, current_timestamp, current_timestamp"
 	}
 
 	stmt := `
@@ -252,20 +252,15 @@ func (c *bounties) UpdateUndertakeBounty(ctx context.Context, input *coresSdk.Up
 	` + values + `
 	)
 	WHERE bounty_id = ${bountyId} AND uid = ${uid}
-	RETURNING id, bounty_id, status`
-
-	tNow := time.Now()
+	RETURNING id, bounty_id, status;
+	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{bountyId}":    input.BountyId,
-		"{uid}":         input.UserId,
-		"{status}":      input.Status,
-		"{submittedAt}": tNow,
-		"{quitedAt}":    tNow,
-		"{paidAt}":      tNow,
-		"{updatedAt}":   tNow,
+		"{bountyId}": input.BountyId,
+		"{uid}":      input.UserId,
+		"{status}":   input.Status,
 	})
 
 	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
-		return db.GetContext(ctx, &output, query, args...)
+		return db.GetContext(ctx, output, query, args...)
 	})
 }

@@ -194,7 +194,7 @@ func (p *appConfig) ConfigRoutes() {
 			),
 			s.Router("/:id:paid",
 				s.Filter(filters.LoginRequiredInner),
-				s.Post(bounties.BountiesHandler{}).Action("Paid"),
+				s.Put(bounties.BountiesHandler{}).Action("Paid"),
 			),
 			s.Router("/users/:userId",
 				s.Get(bounties.BountiesHandler{}).Action("ListUserBounties"),
