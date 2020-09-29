@@ -110,11 +110,17 @@ type ListBountiesResult struct {
 
 type CreateUndertakeBountyInput struct {
 	BountyId flake.ID `json:"bountyId" validate:"required"`
+	UserId   flake.ID `json:"userId" validate:"required"`
 	TxId     string   `json:"txId" validate:"required"`
 }
 
+type UpdateUndertakeBountyInput struct {
+	BountyId flake.ID              `json:"bountyId" validate:"required"`
+	UserId   flake.ID              `json:"userId" validate:"required"`
+	Status   BountyHunterRelStatus `json:"status"`
+}
+
 type UndertakeBountyResult struct {
-	Id       flake.ID              `json:"id" db:"id"`
-	BountyId flake.ID              `json:"bountyId" db:"bounty_id"`
-	Status   BountyHunterRelStatus `json:"status" db:"status"`
+	Id       flake.ID `json:"id" db:"id"`
+	BountyId flake.ID `json:"bountyId" db:"bounty_id"`
 }

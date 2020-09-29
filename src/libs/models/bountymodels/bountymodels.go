@@ -189,14 +189,14 @@ func (c *bounties) GetBounty(ctx context.Context, id flake.ID, isOwner bool, out
 	return
 }
 
-func (c *bounties) CreateUndertakeBounty(ctx context.Context, uid flake.ID, input *coresSdk.CreateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
+func (c *bounties) CreateUndertakeBounty(ctx context.Context, input *coresSdk.CreateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
 	stmt := `
 		INSERT INTO bounties_hunters_rel(bounty_id, uid, status, started_at)
 		VALUES (${bountyId}, ${uid}, ${status}, ${startedAt}) RETURNING id, bounty_id, status;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
 		"{bountyId}":  input.BountyId,
-		"{uid}":       uid,
+		"{uid}":       input.UserId,
 		"{status}":    coresSdk.UndertakeBountyStatusNull,
 		"{startedAt}": time.Now(),
 	})
@@ -213,5 +213,59 @@ func (c *bounties) CreateUndertakeBounty(ctx context.Context, uid flake.ID, inpu
 		}
 
 		return ethmodels.Transactions.Create(newCtx, &createTransactionsInput)
+	})
+}
+
+func (c *bounties) SubmittedUndertakeBounty(ctx context.Context, input *coresSdk.UpdateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
+	input.Status = coresSdk.UndertakeBountyStatusSubmitted
+	return c.UpdateUndertakeBounty(ctx, input, output)
+}
+
+func (c *bounties) QuitedUndertakeBounty(ctx context.Context, input *coresSdk.UpdateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
+	input.Status = coresSdk.UndertakeBountyStatusQuited
+	return c.UpdateUndertakeBounty(ctx, input, output)
+}
+
+func (c *bounties) PaidUndertakeBounty(ctx context.Context, input *coresSdk.UpdateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
+	input.Status = coresSdk.UndertakeBountyStatusPaid
+	return c.UpdateUndertakeBounty(ctx, input, output)
+}
+
+func (c *bounties) UpdateUndertakeBounty(ctx context.Context, input *coresSdk.UpdateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
+	fields := ""
+	values := ""
+	if input.Status == coresSdk.UndertakeBountyStatusSubmitted {
+		fields += "status, submitted_at, updated_at"
+		values += "${status}, ${submittedAt}, ${updatedAt}"
+	} else if input.Status == coresSdk.UndertakeBountyStatusQuited {
+		fields += "status, quited_at, updated_at"
+		values += "${status}, ${quitedAt}, ${updatedAt}"
+	} else if input.Status == coresSdk.UndertakeBountyStatusPaid {
+		fields += "status, paid_at, updated_at"
+		values += "${status}, ${paidAt}, ${updatedAt}"
+	}
+
+	stmt := `
+	UPDATE bounties_hunters_rel SET (
+	    ` + fields + `
+	) = (
+	` + values + `
+	)
+	WHERE bounty_id = ${bountyId} AND uid = ${uid}
+	RETURNING id, bounty_id, status`
+
+	tNow := time.Now()
+	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+		"{bountyId}":    input.BountyId,
+		"{uid}":         input.UserId,
+		"{status}":      input.Status,
+		"{submittedAt}": tNow,
+		"{quitedAt}":    tNow,
+		"{paidAt}":      tNow,
+		"{updatedAt}":   tNow,
+	})
+
+	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
+		return db.GetContext(ctx, &output, query, args...)
 	})
 }
