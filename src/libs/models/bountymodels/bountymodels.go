@@ -100,6 +100,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 	filterSql := `
         FROM bounties b
         INNER JOIN startups s ON s.id = b.startup_id
+        INNER JOIN startup_revisions sr ON s.id = sr.startup_id
 		INNER JOIN users u ON b.user_id = u.id
 		LEFT JOIN hunters h ON u.id = h.user_id
 	`
@@ -136,7 +137,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 
 	query := `
 	WITH bounties_cte AS (
-		SELECT b.*, t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name) startup, json_build_object('id',b.user_id,'name',coalesce(h.name,u.public_key),'is_hunter',CASE WHEN h.name IS NOT NULL THEN TRUE ELSE FALSE END) created_by
+		SELECT b.*, t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name ,'logo' ,sr.logo) startup, json_build_object('id',b.user_id,'name',coalesce(h.name,u.public_key),'is_hunter',CASE WHEN h.name IS NOT NULL THEN TRUE ELSE FALSE END) created_by
 		` + filterSql + `
         ` + joinCondition + `
 		WHERE 1=1 
