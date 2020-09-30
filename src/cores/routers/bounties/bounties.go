@@ -189,22 +189,89 @@ func (h *BountiesHandler) Create(startupId flake.ID) (res interface{}) {
 
 func (h *BountiesHandler) StartWork(bountyId flake.ID) (res interface{}) {
 	var input cores.CreateUndertakeBountyInput
-	input.BountyId = bountyId
 	if err := h.Params.BindJsonBody(&input); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
 	}
+	h.Ctx.Find(&input.UserId, "uid")
+	input.BountyId = bountyId
 	if err := validate.Default.Struct(input); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
 	}
 
-	var uid flake.ID
-	h.Ctx.Find(&uid, "uid")
 	var output cores.UndertakeBountyResult
-	if err := bountymodels.Bounties.CreateUndertakeBounty(h.Ctx, uid, &input, &output); err != nil {
+	if err := bountymodels.Bounties.CreateUndertakeBounty(h.Ctx, &input, &output); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&output, http.StatusOK)
+	return
+}
+
+func (h *BountiesHandler) Submitted(bountyId flake.ID) (res interface{}) {
+	var input cores.UpdateUndertakeBountyInput
+	h.Ctx.Find(&input.UserId, "uid")
+	input.BountyId = bountyId
+	if err := validate.Default.Struct(input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	var output cores.UndertakeBountyResult
+	if err := bountymodels.Bounties.SubmittedUndertakeBounty(h.Ctx, &input, &output); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&output, http.StatusOK)
+	return
+}
+
+func (h *BountiesHandler) Quited(bountyId flake.ID) (res interface{}) {
+	var input cores.UpdateUndertakeBountyInput
+	h.Ctx.Find(&input.UserId, "uid")
+	input.BountyId = bountyId
+	if err := validate.Default.Struct(input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	var output cores.UndertakeBountyResult
+	if err := bountymodels.Bounties.QuitedUndertakeBounty(h.Ctx, &input, &output); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&output, http.StatusOK)
+	return
+}
+
+func (h *BountiesHandler) Paid(bountyId flake.ID) (res interface{}) {
+	var input cores.UpdateUndertakeBountyInput
+	if err := h.Params.BindJsonBody(&input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	input.BountyId = bountyId
+	if err := validate.Default.Struct(input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	var output cores.UndertakeBountyResult
+	if err := bountymodels.Bounties.PaidUndertakeBounty(h.Ctx, &input, &output); err != nil {
 		h.Log.Warn(err)
 		res = apierror.HandleError(err)
 		return
