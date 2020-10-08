@@ -40,6 +40,7 @@ const (
 	UndertakeBountyStatusSubmitted BountyHunterRelStatus = iota
 	UndertakeBountyStatusPaid      BountyHunterRelStatus = iota
 	UndertakeBountyStatusQuited    BountyHunterRelStatus = iota
+	UndertakeBountyStatusRejected  BountyHunterRelStatus = iota
 )
 
 type CreateBountyInput struct {
