@@ -191,14 +191,13 @@ func (c *bounties) GetBounty(ctx context.Context, id flake.ID, isOwner bool, out
 
 func (c *bounties) CreateUndertakeBounty(ctx context.Context, input *coresSdk.CreateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
 	stmt := `
-		INSERT INTO bounties_hunters_rel(bounty_id, uid, status, started_at)
-		VALUES (${bountyId}, ${uid}, ${status}, ${startedAt}) RETURNING id, bounty_id, status;
+		INSERT INTO bounties_hunters_rel(bounty_id, uid, status)
+		VALUES (${bountyId}, ${uid}, ${status}) RETURNING id, bounty_id, status;
 	`
 	query, args := util.PgMapQuery(stmt, map[string]interface{}{
-		"{bountyId}":  input.BountyId,
-		"{uid}":       input.UserId,
-		"{status}":    coresSdk.UndertakeBountyStatusNull,
-		"{startedAt}": time.Now(),
+		"{bountyId}": input.BountyId,
+		"{uid}":      input.UserId,
+		"{status}":   coresSdk.UndertakeBountyStatusNull,
 	})
 
 	return c.Invoke(ctx, func(db *sqlx.Tx) error {
