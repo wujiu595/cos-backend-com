@@ -280,3 +280,29 @@ func (h *BountiesHandler) Paid(bountyId flake.ID) (res interface{}) {
 	res = apires.With(&output, http.StatusOK)
 	return
 }
+
+func (h *BountiesHandler) Rejected(bountyId flake.ID) (res interface{}) {
+	var input cores.UpdateUndertakeBountyInput
+	if err := h.Params.BindJsonBody(&input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	input.BountyId = bountyId
+	if err := validate.Default.Struct(input); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	var output cores.UndertakeBountyResult
+	if err := bountymodels.Bounties.RejectedUndertakeBounty(h.Ctx, &input, &output); err != nil {
+		h.Log.Warn(err)
+		res = apierror.HandleError(err)
+		return
+	}
+
+	res = apires.With(&output, http.StatusOK)
+	return
+}

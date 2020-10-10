@@ -231,6 +231,11 @@ func (c *bounties) PaidUndertakeBounty(ctx context.Context, input *coresSdk.Upda
 	return c.UpdateUndertakeBounty(ctx, input, output)
 }
 
+func (c *bounties) RejectedUndertakeBounty(ctx context.Context, input *coresSdk.UpdateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
+	input.Status = coresSdk.UndertakeBountyStatusRejected
+	return c.UpdateUndertakeBounty(ctx, input, output)
+}
+
 func (c *bounties) UpdateUndertakeBounty(ctx context.Context, input *coresSdk.UpdateUndertakeBountyInput, output *coresSdk.UndertakeBountyResult) (err error) {
 	fields := ""
 	values := ""
@@ -242,6 +247,9 @@ func (c *bounties) UpdateUndertakeBounty(ctx context.Context, input *coresSdk.Up
 		values += "${status}, current_timestamp, current_timestamp"
 	} else if input.Status == coresSdk.UndertakeBountyStatusPaid {
 		fields += "status, paid_at, updated_at"
+		values += "${status}, current_timestamp, current_timestamp"
+	} else if input.Status == coresSdk.UndertakeBountyStatusRejected {
+		fields += "status, rejected_at, updated_at"
 		values += "${status}, current_timestamp, current_timestamp"
 	}
 
