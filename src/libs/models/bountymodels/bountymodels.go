@@ -12,7 +12,6 @@ import (
 	"cos-backend-com/src/libs/models/ethmodels"
 	coresSdk "cos-backend-com/src/libs/sdk/cores"
 	ethSdk "cos-backend-com/src/libs/sdk/eth"
-	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -163,7 +162,6 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 	SELECT
 		COALESCE(json_agg(r.*), '[]'::json)
 	FROM res r;`
-	fmt.Println(query)
 	query, args := util.PgMapQueryV2(query, plan.Params)
 
 	err = c.Invoke(ctx, func(db dbconn.Q) error {
