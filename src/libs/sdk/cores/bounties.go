@@ -61,8 +61,9 @@ type CreateBountyInput struct {
 }
 
 type BountyOutput struct {
-	Id      flake.ID `json:"id" db:"id"`
-	Startup struct {
+	Id       flake.ID `json:"id" db:"id"`
+	SerialNo int      `json:"serialNo" db:"serial_no"`
+	Startup  struct {
 		Id   flake.ID `json:"id" db:"id"`
 		Name string   `json:"name" db:"name"`
 		Logo string   `json:"logo" db:"logo"`
