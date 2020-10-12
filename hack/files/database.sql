@@ -148,7 +148,8 @@ CREATE TABLE comunion.bounties_hunters_rel (
     paid_at timestamp with time zone,
     paid_tokens jsonb DEFAULT '[]'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    rejected_at timestamp with time zone
 );
 
 
