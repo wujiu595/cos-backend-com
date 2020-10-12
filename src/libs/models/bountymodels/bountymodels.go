@@ -140,7 +140,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 		SELECT b.*, t.block_addr, t.state transaction_state, current_timestamp<b.expired_at is_open,json_build_object('id',s.id,'name',s.name ,'logo' ,sr.logo) startup, json_build_object('id',b.user_id,'name',coalesce(h.name,u.public_key),'is_hunter',CASE WHEN h.name IS NOT NULL THEN TRUE ELSE FALSE END) created_by
 		` + filterSql + `
         ` + joinCondition + `
-		WHERE 1=1 
+		WHERE 1=1
 		` + plan.Conditions + `
 		` + plan.OrderBySql + `
 		` + plan.LimitSql + `
@@ -269,5 +269,21 @@ func (c *bounties) UpdateUndertakeBounty(ctx context.Context, input *coresSdk.Up
 
 	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
 		return db.GetContext(ctx, output, query, args...)
+	})
+}
+
+func (c *bounties) ClosedBounty(ctx context.Context) (err error) {
+	stmt := `
+		UPDATE bounties SET status = ${statusClosed}
+		WHERE status != ${statusClosed} AND expired_at<current_timestamp;
+	`
+
+	query, args := util.PgMapQuery(stmt, map[string]interface{}{
+		"{statusClosed}": coresSdk.BountyStatusClosed,
+	})
+
+	return c.Invoke(ctx, func(db dbconn.Q) (er error) {
+		_, er = db.ExecContext(ctx, query, args...)
+		return
 	})
 }
