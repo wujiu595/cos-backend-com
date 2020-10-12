@@ -81,7 +81,7 @@ func (c *bounties) ListBounties(ctx context.Context, startupId, uid flake.ID, is
 		plan.AddCond(`AND b.startup_id = ${startupId}`)
 	}
 
-	plan.OrderBySql = ` ORDER BY created_at DESC`
+	plan.OrderBySql = ` ORDER BY is_closed ASC, created_at DESC`
 	plan.LimitSql = ` LIMIT ${limit} OFFSET ${offset}`
 
 	plan.Params = map[string]interface{}{
@@ -137,7 +137,12 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 
 	query := `
 	WITH bounties_cte AS (
-		SELECT b.*, t.block_addr, t.state transaction_state,json_build_object('id',s.id,'name',s.name ,'logo' ,sr.logo) startup, json_build_object('id',b.user_id,'name',coalesce(h.name,u.public_key),'is_hunter',CASE WHEN h.name IS NOT NULL THEN TRUE ELSE FALSE END) created_by
+		SELECT b.*,
+			t.block_addr,
+			t.state transaction_state,
+			json_build_object('id',s.id,'name',s.name ,'logo' ,sr.logo) startup,
+			json_build_object('id',b.user_id,'name',coalesce(h.name,u.public_key),'is_hunter',CASE WHEN h.name IS NOT NULL THEN TRUE ELSE FALSE END) created_by,
+			(CASE WHEN status !=2 THEN 0 ELSE status END) order_status
 		` + filterSql + `
         ` + joinCondition + `
 		WHERE 1=1
@@ -157,7 +162,8 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 	),res AS (
 	    SELECT bc.*, COALESCE(bhrac.hunters, '[]'::json) hunters
 	    FROM bounties_cte bc
-	    LEFT JOIN bounty_hunter_rels_aggregate_cte bhrac ON bc.id = bhrac.bounty_id
+		LEFT JOIN bounty_hunter_rels_aggregate_cte bhrac ON bc.id = bhrac.bounty_id
+		` + plan.OrderBySql + `
 	)
 	SELECT
 		COALESCE(json_agg(r.*), '[]'::json)
@@ -274,7 +280,7 @@ func (c *bounties) UpdateUndertakeBounty(ctx context.Context, input *coresSdk.Up
 
 func (c *bounties) ClosedBounty(ctx context.Context) (err error) {
 	stmt := `
-		UPDATE bounties SET status = ${statusClosed}
+		UPDATE bounties SET status = ${statusClosed}, is_closed = true
 		WHERE status != ${statusClosed} AND expired_at<current_timestamp;
 	`
 
