@@ -83,7 +83,6 @@ type BountyOutput struct {
 	Payments            types.JSONText `json:"payments" db:"payments"`
 	Hunters             []struct {
 		UserId      flake.ID              `json:"userId" db:"user_id"`
-		HunterId    flake.ID              `json:"hunterId" db:"hunter_id"`       // hunter_id
 		Name        string                `json:"name" db:"name"`                // name
 		Status      BountyHunterRelStatus `json:"status" db:"status"`            // status
 		StartedAt   *time.Time            `json:"startedAt" db:"started_at"`     // started_at
