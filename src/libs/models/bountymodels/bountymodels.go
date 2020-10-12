@@ -117,6 +117,7 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 	}
 
 	plan.Params["{source}"] = ethSdk.TransactionSourceBounty
+	plan.Params["{undertakeBountySource}"] = ethSdk.TransactionSourceUndertakeBounty
 
 	if plan.RetTotal {
 		query :=
@@ -150,11 +151,12 @@ func (c *bounties) Query(ctx context.Context, uid flake.ID, isOwner bool, m inte
 		` + plan.OrderBySql + `
 		` + plan.LimitSql + `
 	),bounty_hunter_rels_cte AS (
-		SELECT bhr.bounty_id, bhr.uid as user_id, bhr.status, bhr.started_at, bhr.submitted_at, bhr.quited_at, bhr.paid_at, bhr.paid_tokens,COALESCE(h.name, u.public_key) AS name
+		SELECT bhr.bounty_id, bhr.uid as user_id, bhr.status, bhr.started_at, bhr.submitted_at, bhr.quited_at, bhr.rejected_at, bhr.paid_at, bhr.paid_tokens,COALESCE(h.name, u.public_key) AS name, t.state transaction_state
 		FROM bounties_cte bc
 		LEFT JOIN bounties_hunters_rel bhr ON bhr.bounty_id = bc.id
 		LEFT JOIN users u ON bhr.uid = u.id
 		LEFT JOIN hunters h ON u.id = h.user_id
+		LEFT JOIN transactions t ON t.source_id = bhr.id AND t.source = ${undertakeBountySource}
 	),bounty_hunter_rels_aggregate_cte AS (
 		SELECT bhrc.bounty_id, COALESCE(json_agg(bhrc), '[]'::json) hunters
 		FROM bounty_hunter_rels_cte bhrc
