@@ -181,7 +181,7 @@ func (p *appConfig) ConfigRoutes() {
 				),
 			),
 			s.Router("/:id:closed",
-				s.Get(bounties.BountiesHandler{}).Filter(filters.LoginRequiredInner).Action("Closed"),
+				s.Put(bounties.BountiesHandler{}).Filter(filters.LoginRequiredInner).Action("Closed"),
 			),
 			s.Router("/:id:startWork",
 				s.Filter(filters.LoginRequiredInner),
